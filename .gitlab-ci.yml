@@ -1,4 +1,4 @@
-image: eclipse-temurin:21-jdk-alpine
+image: maven:3.9-eclipse-temurin-21-alpine
 
 stages:
   - test
@@ -13,5 +13,4 @@ cache:
 run-tests:
   stage: test
   script:
-    - chmod +x mvnw
-    - ./mvnw clean test
+    - mvn clean test
