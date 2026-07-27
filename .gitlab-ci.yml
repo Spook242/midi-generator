@@ -1,0 +1,17 @@
+image: eclipse-temurin:21-jdk-alpine
+
+stages:
+  - test
+
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+
+cache:
+  paths:
+    - .m2/repository
+
+run-tests:
+  stage: test
+  script:
+    - chmod +x mvnw
+    - ./mvnw clean test
