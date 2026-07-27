@@ -1,5 +1,6 @@
-package cat.itacademy.midi_generator.application.port.in;
+package cat.itacademy.midi_generator.infrastructure.adapter.in.web;
 
+import cat.itacademy.midi_generator.application.port.in.CreatePatternUseCase;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
