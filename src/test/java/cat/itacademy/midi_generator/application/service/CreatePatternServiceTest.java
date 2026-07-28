@@ -28,7 +28,13 @@ class CreatePatternServiceTest {
 
     @Test
     void shouldCreatePatternSuccessfully() {
-        CreatePatternCommand command = new CreatePatternCommand("Industrial Sequence", 120);
+        CreatePatternCommand command = new CreatePatternCommand(
+                "Industrial Bassline",
+                120,
+                "C",
+                "Minor",
+                1
+        );
 
         when(patternRepository.save(any(MidiPattern.class))).thenAnswer(invocation -> invocation.getArgument(0));
 

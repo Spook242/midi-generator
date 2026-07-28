@@ -30,7 +30,10 @@ class PatternControllerTest {
         String requestJson = """
                 {
                     "name": "Industrial Bassline",
-                    "bpm": 120
+                    "bpm": 120,
+                    "key": "C",
+                    "scale": "Minor",
+                    "lengthInBars": 1
                 }
                 """;
 
