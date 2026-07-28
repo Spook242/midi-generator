@@ -47,7 +47,7 @@ El proyecto se rige por un diseño agnóstico al framework utilizando **Arquitec
 
 
 
-##Directrices para los Equipos
+# Directrices para los Equipos
 
 # Backend (Motor y API)
 * **Lenguaje:** Java 21
