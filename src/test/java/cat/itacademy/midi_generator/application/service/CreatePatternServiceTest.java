@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -18,11 +19,11 @@ class CreatePatternServiceTest {
 
     @Mock
     private PatternRepository patternRepository;
-
     private CreatePatternService createPatternService;
 
     @BeforeEach
     void setUp() {
+        patternRepository = mock(PatternRepository.class);
         createPatternService = new CreatePatternService(patternRepository);
     }
 
