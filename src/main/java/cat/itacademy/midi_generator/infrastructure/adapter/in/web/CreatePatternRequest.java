@@ -10,5 +10,8 @@ public record CreatePatternRequest(
 
         @Min(value = 40, message = "BPM must be at least 40.")
         @Max(value = 300, message = "BPM cannot exceed 300.")
-        int bpm
+        int bpm,
+        String key,
+        String scale,
+        int lengthInBars
 ) {}

@@ -20,7 +20,13 @@ public class PatternController {
 
     @PostMapping
     public ResponseEntity<MidiPattern> createPattern(@Valid @RequestBody CreatePatternRequest request) {
-        var command = new CreatePatternCommand(request.name(), request.bpm());
+        var command =  new CreatePatternCommand(
+                request.name(),
+                request.bpm(),
+                request.key(),
+                request.scale(),
+                request.lengthInBars()
+        );
         MidiPattern createdPattern = createPatternUseCase.createPattern(command);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdPattern);
     }
