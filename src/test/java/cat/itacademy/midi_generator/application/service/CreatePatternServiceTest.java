@@ -9,7 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -30,7 +30,7 @@ class CreatePatternServiceTest {
     @Test
     void shouldCreatePatternSuccessfully() {
         CreatePatternCommand command = new CreatePatternCommand(
-                "Industrial Bassline",
+                "Techno Bassline",
                 120,
                 "C",
                 "Minor",
@@ -41,6 +41,8 @@ class CreatePatternServiceTest {
 
         MidiPattern result = createPatternService.createPattern(command);
 
-        assertNotNull(result, "The generated pattern should not be null.");
+        assertThat(result).isNotNull();
+        assertThat(result.getName()).isEqualTo("Techno Bassline");
+        assertThat(result.getNotes()).hasSize(16);
     }
 }
