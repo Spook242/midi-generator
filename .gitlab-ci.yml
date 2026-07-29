@@ -14,3 +14,4 @@ run-tests:
   stage: test
   script:
     - mvn clean test
+    - cd backend
