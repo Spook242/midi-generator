@@ -1,0 +1,42 @@
+.landing-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: #fdfaf6;
+  font-family: Arial, sans-serif;
+}
+
+.logo {
+  max-width: 600px;
+  width: 90%;
+  margin-bottom: 3rem;
+}
+
+.button-group {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.btn-blue {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 12px 32px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s, transform 0.1s;
+}
+
+.btn-blue:hover {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+}
+
+.btn-blue:active {
+  transform: translateY(0);
+}

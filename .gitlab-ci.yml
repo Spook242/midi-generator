@@ -13,4 +13,5 @@ cache:
 run-tests:
   stage: test
   script:
+    - cd backend
     - mvn clean test
