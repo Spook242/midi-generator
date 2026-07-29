@@ -27,9 +27,10 @@ public class CreatePatternService implements CreatePatternUseCase {
         int totalSteps = command.lengthInBars() * 16;
 
         for (int i = 0; i < totalSteps; i++) {
-            int pitch = availablePitches.get(i % availablePitches.size());
+            int pitch = availablePitches.get((i / 2) % availablePitches.size());
+            int velocity = (i % 4 == 0) ? 127 : 85;
 
-            Note note = new Note(pitch, 100, i, 1);
+            Note note = new Note(pitch, velocity, i, 1);
             pattern.addNote(note);
         }
 

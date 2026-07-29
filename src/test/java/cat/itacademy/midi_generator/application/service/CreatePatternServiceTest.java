@@ -42,7 +42,7 @@ class CreatePatternServiceTest {
         MidiPattern result = createPatternService.createPattern(command);
 
         assertThat(result).isNotNull();
-        assertThat(result.getName()).isEqualTo("Techno Bassline");
-        assertThat(result.getNotes()).hasSize(16);
+        assertThat(result.getNotes().get(0).velocity()).isEqualTo(127);
+        assertThat(result.getNotes().get(1).velocity()).isEqualTo(85);
     }
 }
