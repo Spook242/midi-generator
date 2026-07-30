@@ -13,10 +13,10 @@ export class Generator {
   selectedScale: string = 'MAJOR';
 
   generateMidi() {
-    console.log('🎵 ¡Botón pulsado! Preparando datos para el servidor...');
-    console.log('Velocidad (BPM):', this.bpm);
-    console.log('Nota Raíz:', this.selectedKey);
-    console.log('Escala:', this.selectedScale);
+    console.log('🎵 ¡Button pressed! Preparing data for the server...');
+    console.log('velocity (BPM):', this.bpm);
+    console.log('Root Note:', this.selectedKey);
+    console.log('Scale:', this.selectedScale);
   }
 
 
