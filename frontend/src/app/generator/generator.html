@@ -36,5 +36,9 @@
     </div>
   </div>
 
-  <button class="btn-blue generate-btn" (click)="generateMidi()">Generate MIDI pattern</button>
+  <button class="btn-blue generate-btn"
+          [disabled]="bpm < 60 || bpm > 200"
+          (click)="generateMidi()">
+    Generate MIDI pattern
+  </button>
 </div>
