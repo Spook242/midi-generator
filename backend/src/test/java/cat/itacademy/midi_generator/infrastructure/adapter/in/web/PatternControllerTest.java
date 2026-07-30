@@ -43,7 +43,7 @@ class PatternControllerTest {
         mockMvc.perform(post("/api/v1/patterns")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(content().contentType("audio/midi"))
                 .andExpect(header().string("Content-Disposition", "attachment; filename=\"Test_Pattern.mid\""))
                 .andExpect(result -> org.assertj.core.api.Assertions.assertThat(result.getResponse().getContentAsByteArray()).isNotEmpty());
