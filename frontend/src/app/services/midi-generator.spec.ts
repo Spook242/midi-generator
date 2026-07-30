@@ -24,22 +24,31 @@ describe('MidiGeneratorService', () => {
     httpMock.verify();
   });
 
-  it('debería crearse correctamente', () => {
+  it('should be created', () => {
     expect(service).toBeTruthy();
   });
 
-  it('debería enviar una petición POST con los datos correctos y devolver un Blob', () => {
-    const mockPayload = { bpm: 120, key: 'C', scale: 'MAJOR' };
-    const mockBlob = new Blob(['midi-data-mock'], { type: 'audio/midi' });
+  it('should send a POST request with the correct payload and expect a blob response', () => {
+    const mockPayload = {
+      name: 'Generated Pattern',
+      bpm: 120,
+      key: 'C',
+      scale: 'MAJOR',
+      lengthInBars: 4
+    };
+
+    const dummyBlob = new Blob(['midi-binary-content'], { type: 'audio/midi' });
 
     service.generatePattern(mockPayload).subscribe(response => {
-      expect(response).toEqual(mockBlob);
+      expect(response).toEqual(dummyBlob);
     });
 
-    const req = httpMock.expectOne('http://localhost:8080/api/midi/generate');
+    const req = httpMock.expectOne('http://localhost:8080/api/v1/patterns');
+
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual(mockPayload);
+    expect(req.request.responseType).toBe('blob');
 
-    req.flush(mockBlob);
+    req.flush(dummyBlob);
   });
 });
