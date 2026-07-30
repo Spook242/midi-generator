@@ -1,0 +1,27 @@
+<div class="studio-container">
+  <h2>MidiGen Studio</h2>
+  <p class="subtitle">Configure the parameters for your new melody</p>
+
+  <form (ngSubmit)="onSubmit()" class="generator-card">
+    <div class="form-group">
+      <label>BPM (Tempo)</label>
+      <input type="number" [(ngModel)]="bpm" name="bpm" />
+    </div>
+
+    <div class="form-group">
+      <label>Root Key</label>
+      <select [(ngModel)]="selectedKey" name="selectedKey">
+        <option *ngFor="let k of keys" [value]="k">{{ k }}</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Scale</label>
+      <select [(ngModel)]="selectedScale" name="selectedScale">
+        <option *ngFor="let s of scales" [value]="s">{{ s }}</option>
+      </select>
+    </div>
+
+    <button type="submit" class="generate-btn">Generate MIDI pattern</button>
+  </form>
+</div>

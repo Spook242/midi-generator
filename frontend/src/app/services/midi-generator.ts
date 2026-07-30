@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class MidiGeneratorService {
-  private apiUrl = 'http://localhost:8080/api/midi/generate';
+  private apiUrl = 'http://localhost:8080/api/v1/patterns';
 
   constructor(private http: HttpClient) {}
 
