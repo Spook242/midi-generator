@@ -13,14 +13,18 @@ export class Generator {
   bpm: number = 120;
   selectedKey: string = 'C';
   selectedScale: string = 'MAJOR';
+  patternName: string = 'Generated Pattern';
+  lengthInBars: number = 4;
 
   constructor(private midiService: MidiGeneratorService) {}
 
   generateMidi() {
     const payload = {
+      name: this.patternName,
       bpm: this.bpm,
       key: this.selectedKey,
-      scale: this.selectedScale
+      scale: this.selectedScale,
+      lengthInBars: this.lengthInBars
     };
 
     console.log('Sending parameters to the backend...', payload);
