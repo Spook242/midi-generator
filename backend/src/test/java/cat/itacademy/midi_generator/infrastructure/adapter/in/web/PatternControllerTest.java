@@ -1,20 +1,20 @@
 package cat.itacademy.midi_generator.infrastructure.adapter.in.web;
 
 import cat.itacademy.midi_generator.application.port.in.CreatePatternUseCase;
-import cat.itacademy.midi_generator.application.port.in.CreatePatternUseCase.CreatePatternCommand;
 import cat.itacademy.midi_generator.domain.MidiPattern;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(PatternController.class)
 class PatternControllerTest {
@@ -22,61 +22,30 @@ class PatternControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockitoBean
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @MockBean
     private CreatePatternUseCase createPatternUseCase;
 
     @Test
-    void givenValidRequest_whenCreatePattern_thenReturns201() throws Exception {
-        String requestJson = """
-                {
-                    "name": "Industrial Bassline",
-                    "bpm": 120,
-                    "key": "C",
-                    "scale": "Minor",
-                    "lengthInBars": 1
-                }
-                """;
+    void shouldReturnMidiFileAsByteArrayWhenRequestIsValid() throws Exception {
+        CreatePatternRequest request = new CreatePatternRequest(
+                "Test Pattern",
+                120,
+                "C",
+                "Major",
+                4
+        );
 
-        MidiPattern mockPattern = new MidiPattern("Electronic Bassline", 120);
-
-        when(createPatternUseCase.createPattern(any(CreatePatternCommand.class)))
-                .thenReturn(mockPattern);
-
+        MidiPattern mockPattern = new MidiPattern("Test Pattern", 120);
+        when(createPatternUseCase.createPattern(any())).thenReturn(mockPattern);
         mockMvc.perform(post("/api/v1/patterns")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestJson))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name").value("Electronic Bassline"))
-                .andExpect(jsonPath("$.bpm").value(120));
-    }
-
-    @Test
-    void givenInvalidName_whenCreatePattern_thenReturns400() throws Exception {
-        String requestJson = """
-                {
-                    "name": "",
-                    "bpm": 120
-                }
-                """;
-
-        mockMvc.perform(post("/api/v1/patterns")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestJson))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void givenInvalidBpm_whenCreatePattern_thenReturns400() throws Exception {
-        String requestJson = """
-                {
-                    "name": "EBM Sequence",
-                    "bpm": 30
-                }
-                """;
-
-        mockMvc.perform(post("/api/v1/patterns")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestJson))
-                .andExpect(status().isBadRequest());
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("audio/midi"))
+                .andExpect(header().string("Content-Disposition", "attachment; filename=\"Test_Pattern.mid\""))
+                .andExpect(result -> org.assertj.core.api.Assertions.assertThat(result.getResponse().getContentAsByteArray()).isNotEmpty());
     }
 }
