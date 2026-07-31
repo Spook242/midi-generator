@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { PatternForm } from './pattern-form';
+import { PatternFormComponent } from './pattern-form';
 
 describe('PatternForm', () => {
-  let component: PatternForm;
-  let fixture: ComponentFixture<PatternForm>;
+  let component: PatternFormComponent;
+  let fixture: ComponentFixture<PatternFormComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PatternForm]
+      imports: [PatternFormComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(PatternForm);
+    fixture = TestBed.createComponent(PatternFormComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });
