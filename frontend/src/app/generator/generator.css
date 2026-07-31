@@ -1,13 +1,3 @@
-/* Variables de color basadas en tu diseño */
-:host {
-  --bg-dark: #121418;
-  --panel-bg: #1C1F26;
-  --text-main: #E0E0E0;
-  --text-muted: #8A8F98;
-  --accent-blue: #3B82F6;
-  --border-color: #2A2D35;
-}
-
 .dashboard-container {
   display: flex;
   flex-direction: column;
@@ -19,7 +9,6 @@
   box-sizing: border-box;
 }
 
-/* --- CABECERA --- */
 .topbar {
   display: flex;
   justify-content: space-between;
@@ -63,16 +52,14 @@
   object-fit: cover;
 }
 
-/* --- CONTENIDO PRINCIPAL (3 COLUMNAS) --- */
 .main-content {
   display: grid;
-  grid-template-columns: 300px 1fr 320px; /* Izquierda, Centro (expande), Derecha */
+  grid-template-columns: 300px 1fr 320px;
   gap: 1.5rem;
-  flex: 1; /* Ocupa el resto del alto disponible */
-  min-height: 0; /* Para que el scroll interno funcione si es necesario */
+  flex: 1;
+  min-height: 0;
 }
 
-/* --- PANELES GENÉRICOS --- */
 .panel {
   background-color: var(--panel-bg);
   border: 1px solid var(--border-color);
@@ -103,4 +90,90 @@
   color: var(--text-muted);
   font-style: italic;
   font-size: 0.9rem;
+}
+
+.pattern-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  height: 100%;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.half-width {
+  flex: 1;
+}
+
+label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.dark-input {
+  background-color: var(--bg-dark);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 0.6rem;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.dark-input:focus {
+  border-color: var(--accent-blue);
+}
+
+.bpm-control {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.dark-slider {
+  flex: 1;
+  accent-color: var(--accent-blue);
+}
+
+.num-input {
+  width: 65px;
+  text-align: center;
+}
+
+.spacer {
+  flex-grow: 1;
+}
+
+.btn-generate {
+  background: linear-gradient(180deg, var(--panel-bg) 0%, var(--bg-dark) 100%);
+  border: 1px solid var(--text-muted);
+  color: white;
+  padding: 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-generate:hover:not(:disabled) {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.4), inset 0 0 10px rgba(59, 130, 246, 0.2);
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+}
+
+.btn-generate:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
