@@ -10,6 +10,18 @@ describe('GeneratorComponent', () => {
   let fixture: ComponentFixture<GeneratorComponent>;
   let midiService: MidiGeneratorService;
 
+  it('should automatically convert string BPM values to numbers to sync the slider and input', () => {
+    fixture.detectChanges(); 
+    
+    const slider = fixture.nativeElement.querySelector('input[type="range"]');
+    slider.value = '145';
+    slider.dispatchEvent(new Event('input'));
+    
+    const bpmControl = component.patternForm.get('bpm');
+    expect(bpmControl?.value).toBe(145); // Ahora sí será 145 puro
+    expect(typeof bpmControl?.value).toBe('number');
+  });
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [GeneratorComponent, ReactiveFormsModule],
