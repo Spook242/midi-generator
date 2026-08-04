@@ -2,12 +2,17 @@
 
   <header class="topbar">
     <div class="logo-area">
-      <h1><span class="logo-m">M</span><span class="logo-g">G</span> MIDI Generator</h1>
+      <h1>
+        <span class="logo-m">M</span><span class="logo-g">G</span>
+        MIDI Generator
+      </h1>
     </div>
+
     <nav class="nav-links">
       <a href="#">Explore</a>
       <a href="#" class="active">My Work</a>
       <a href="#">Settings</a>
+
       <div class="avatar">
         <img src="https://i.pravatar.cc/150?img=11" alt="User Avatar">
       </div>
@@ -17,41 +22,91 @@
   <main class="main-content">
 
     <aside class="panel left-panel">
-      <h2>CREATE NEW PATTERN</h2>
 
-      <form [formGroup]="patternForm" (ngSubmit)="onGenerate()" class="pattern-form">
+      <h2>GENERATE NEW PATTERN</h2>
+
+      <form [formGroup]="patternForm"
+            (ngSubmit)="onGenerate()"
+            class="pattern-form">
 
         <div class="form-group">
           <label for="name">Name</label>
-          <input type="text" id="name" formControlName="name" class="dark-input">
+
+          <input
+            id="name"
+            type="text"
+            formControlName="name"
+            class="dark-input">
         </div>
 
         <div class="form-group">
+
           <label for="bpm">BPM</label>
+
           <div class="bpm-control">
-            <input type="range" min="60" max="200" formControlName="bpm" class="dark-slider">
-            <input type="number" min="60" max="200" formControlName="bpm" class="dark-input num-input">
+
+            <input
+              id="bpm"
+              type="range"
+              min="60"
+              max="200"
+              step="1"
+              formControlName="bpm"
+              class="dark-slider">
+
+            <input
+              type="number"
+              min="60"
+              max="200"
+              step="1"
+              class="dark-input num-input"
+              [value]="patternForm.get('bpm')?.value"
+              (input)="patternForm.get('bpm')?.setValue(+$any($event.target).value)">
+
           </div>
+
         </div>
 
         <div class="form-group">
+
           <label for="lengthInBars">Length (bars)</label>
-          <input type="number" id="lengthInBars" formControlName="lengthInBars" class="dark-input">
+
+          <input
+            id="lengthInBars"
+            type="number"
+            formControlName="lengthInBars"
+            class="dark-input">
+
         </div>
 
         <div class="form-row">
+
           <div class="form-group half-width">
+
             <label for="scale">Scale</label>
-            <select id="scale" formControlName="scale" class="dark-input">
+
+            <select
+              id="scale"
+              formControlName="scale"
+              class="dark-input">
+
               <option value="Major">Major</option>
               <option value="Minor">Minor</option>
               <option value="Harmonic Minor">Harmonic Minor</option>
+
             </select>
+
           </div>
 
           <div class="form-group half-width">
+
             <label for="key">Key</label>
-            <select id="key" formControlName="key" class="dark-input">
+
+            <select
+              id="key"
+              formControlName="key"
+              class="dark-input">
+
               <option value="C">C</option>
               <option value="D">D</option>
               <option value="E">E</option>
@@ -59,30 +114,52 @@
               <option value="G">G</option>
               <option value="A">A</option>
               <option value="B">B</option>
+
             </select>
+
           </div>
+
         </div>
 
         <div class="spacer"></div>
 
-        <button type="submit" [disabled]="patternForm.invalid" class="btn-generate">
+        <button
+          type="submit"
+          class="btn-generate"
+          [disabled]="patternForm.invalid">
+
           GENERATE PATTERN
+
         </button>
 
       </form>
+
     </aside>
 
     <section class="panel center-panel">
+
       <div class="panel-header">
         <h2>PATTERN VISUALIZER</h2>
-        <div class="controls placeholder-text">Controles de Play...</div>
+
+        <div class="controls placeholder-text">
+          Controles de Play...
+        </div>
       </div>
-      <p class="placeholder-text">El Grid/Piano Roll irá aquí en el Paso 3...</p>
+
+      <p class="placeholder-text">
+        El Grid/Piano Roll irá aquí en el Paso 3...
+      </p>
+
     </section>
 
     <aside class="panel right-panel">
+
       <h2>MY LIBRARY</h2>
-      <p class="placeholder-text">La lista de canciones irá aquí...</p>
+
+      <p class="placeholder-text">
+        La lista de canciones irá aquí...
+      </p>
+
     </aside>
 
   </main>
