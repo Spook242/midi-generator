@@ -177,3 +177,9 @@ label {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.dark-input.ng-invalid.ng-touched, 
+.dark-input.ng-invalid.ng-dirty {
+  border-color: #ff4757; /* Borde rojo */
+  box-shadow: 0 0 8px rgba(255, 71, 87, 0.3); /* Brillo rojo suave */
+}
