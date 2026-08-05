@@ -20,11 +20,34 @@ describe('PatternVisualizerComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should contain 16 notes', () => {
-    expect(component.notes.length).toBe(16);
+  it('should initialize the grid with the correct dimensions', () => {
+    expect(component.grid.length).toBe(component.notes.length);
+
+    component.grid.forEach(row => {
+      expect(row.length).toBe(component.steps.length);
+    });
   });
 
-  it('should contain 16 steps', () => {
-    expect(component.steps.length).toBe(16);
+  it('should initialize all cells as false', () => {
+    component.grid.forEach(row => {
+      row.forEach(cell => {
+        expect(cell).toBe(false);
+      });
+    });
+  });
+
+  it('should toggle a cell from false to true', () => {
+    expect(component.grid[0][0]).toBe(false);
+
+    component.toggleCell(0, 0);
+
+    expect(component.grid[0][0]).toBe(true);
+  });
+
+  it('should toggle a cell back to false', () => {
+    component.toggleCell(0, 0);
+    component.toggleCell(0, 0);
+
+    expect(component.grid[0][0]).toBe(false);
   });
 });

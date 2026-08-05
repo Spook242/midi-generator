@@ -6,25 +6,33 @@
 
     <div class="note-title"></div>
 
-    @for(step of steps; track step){
+    @for (step of steps; track step) {
 
       <div class="step-number">
-        {{step}}
+        {{ step }}
       </div>
 
     }
 
   </div>
 
-  @for(note of notes; track note){
+  @for (note of notes; track note; let row = $index) {
 
     <div class="note-row">
 
       <div class="note-name">
-
-        {{note}}
-
+        {{ note }}
       </div>
+
+      @for (step of steps; track step; let column = $index) {
+
+        <div
+          class="cell"
+          [class.active]="grid[row][column]"
+          (click)="toggleCell(row, column)">
+        </div>
+
+      }
 
     </div>
 
