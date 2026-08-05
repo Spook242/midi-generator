@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-pattern-visualizer',
@@ -6,7 +6,7 @@ import { Component } from '@angular/core';
   templateUrl: './pattern-visualizer.html',
   styleUrls: ['./pattern-visualizer.css']
 })
-export class PatternVisualizerComponent {
+export class PatternVisualizerComponent implements OnInit {
 
   notes: string[] = [
     'C4',
@@ -31,14 +31,14 @@ export class PatternVisualizerComponent {
 
   grid: boolean[][] = [];
 
-  constructor() {
+  ngOnInit(): void {
     this.grid = this.notes.map(() =>
       Array(this.steps.length).fill(false)
     );
   }
 
-  toggle(row: number, col: number): void {
-    this.grid[row][col] = !this.grid[row][col];
+  toggleCell(row: number, column: number): void {
+    this.grid[row][column] = !this.grid[row][column];
   }
 
 }
