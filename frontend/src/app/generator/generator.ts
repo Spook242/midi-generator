@@ -1,11 +1,17 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MidiGeneratorService } from '../services/midi-generator';
+import { PatternVisualizerComponent } from '../components/pattern-visualizer/pattern-visualizer';
+
+
 
 @Component({
   selector: 'app-generator',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [
+  ReactiveFormsModule,
+  PatternVisualizerComponent
+],
   templateUrl: './generator.html',
   styleUrls: ['./generator.css']
 })

@@ -2,6 +2,7 @@ package cat.itacademy.midi_generator.infrastructure.adapter.in.web;
 
 import cat.itacademy.midi_generator.application.port.in.CreatePatternUseCase;
 import cat.itacademy.midi_generator.domain.MidiPattern;
+import cat.itacademy.midi_generator.infrastructure.adapter.in.web.request.CreatePatternRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
