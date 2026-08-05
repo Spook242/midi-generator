@@ -4,6 +4,7 @@ import cat.itacademy.midi_generator.application.port.in.CreatePatternUseCase;
 import cat.itacademy.midi_generator.application.port.in.CreatePatternUseCase.CreatePatternCommand;
 import cat.itacademy.midi_generator.domain.MidiPattern;
 import cat.itacademy.midi_generator.domain.Note;
+import cat.itacademy.midi_generator.infrastructure.adapter.in.web.request.CreatePatternRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
