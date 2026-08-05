@@ -3,8 +3,9 @@ package cat.itacademy.midi_generator.application.service;
 import cat.itacademy.midi_generator.application.port.in.CreatePatternUseCase;
 import cat.itacademy.midi_generator.application.port.out.PatternRepository;
 import cat.itacademy.midi_generator.domain.MidiPattern;
+import cat.itacademy.midi_generator.domain.MusicalScale;
 import cat.itacademy.midi_generator.domain.Note;
-import cat.itacademy.midi_generator.domain.ScaleCalculator;
+import cat.itacademy.midi_generator.domain.PitchClass;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,7 +23,9 @@ public class CreatePatternService implements CreatePatternUseCase {
     public MidiPattern createPattern(CreatePatternCommand command) {
         MidiPattern pattern = new MidiPattern(command.name(), command.bpm());
 
-        List<Integer> availablePitches = ScaleCalculator.calculatePitches(command.key(), command.scale());
+        PitchClass rootPitch = PitchClass.fromString(command.key());
+        MusicalScale scale = MusicalScale.fromString(command.scale());
+        List<Integer> availablePitches = scale.generatePitches(rootPitch);
 
         int totalSteps = command.lengthInBars() * 16;
 
