@@ -1,0 +1,41 @@
+.visualizer{
+    width:100%;
+}
+
+.header{
+
+    display:flex;
+    margin-bottom:12px;
+
+}
+
+.note-title{
+
+    width:60px;
+
+}
+
+.step-number{
+
+    width:32px;
+    text-align:center;
+    color:#8b8b8b;
+    font-size:12px;
+
+}
+
+.note-row{
+
+    display:flex;
+    align-items:center;
+    height:28px;
+
+}
+
+.note-name{
+
+    width:60px;
+    color:white;
+    font-size:13px;
+
+}

@@ -1,0 +1,33 @@
+<div class="visualizer">
+
+  <h2>Pattern Visualizer</h2>
+
+  <div class="header">
+
+    <div class="note-title"></div>
+
+    @for(step of steps; track step){
+
+      <div class="step-number">
+        {{step}}
+      </div>
+
+    }
+
+  </div>
+
+  @for(note of notes; track note){
+
+    <div class="note-row">
+
+      <div class="note-name">
+
+        {{note}}
+
+      </div>
+
+    </div>
+
+  }
+
+</div>
