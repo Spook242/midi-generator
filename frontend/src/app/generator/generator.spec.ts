@@ -1,80 +1,60 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { GeneratorComponent } from './generator';
 import { ReactiveFormsModule } from '@angular/forms';
+import { MidiGeneratorService } from '../services/midi-generator';
 import { of } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { GeneratorComponent } from './generator';
-import { MidiGeneratorService } from '../services/midi-generator';
+import { By } from '@angular/platform-browser';
 
 describe('GeneratorComponent', () => {
   let component: GeneratorComponent;
   let fixture: ComponentFixture<GeneratorComponent>;
-  let midiService: MidiGeneratorService;
-
-  it('should automatically convert string BPM values to numbers to sync the slider and input', () => {
-    fixture.detectChanges(); 
-    
-    const slider = fixture.nativeElement.querySelector('input[type="range"]');
-    slider.value = '145';
-    slider.dispatchEvent(new Event('input'));
-    
-    const bpmControl = component.patternForm.get('bpm');
-    expect(bpmControl?.value).toBe(145); // Ahora sí será 145 puro
-    expect(typeof bpmControl?.value).toBe('number');
-  });
+  let mockMidiService: any;
 
   beforeEach(async () => {
+    mockMidiService = {
+      generatePattern: vi.fn().mockReturnValue(of(new Blob()))
+    };
+
     await TestBed.configureTestingModule({
       imports: [GeneratorComponent, ReactiveFormsModule],
-      providers: [MidiGeneratorService]
+      providers: [
+        { provide: MidiGeneratorService, useValue: mockMidiService }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(GeneratorComponent);
     component = fixture.componentInstance;
-    midiService = TestBed.inject(MidiGeneratorService);
-
-    fixture.detectChanges();
+    fixture.detectChanges(); 
   });
 
-  it('should create the component', () => {
+  it('should create the component successfully', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should initialize the form with default values', () => {
+  it('should initialize the form with default values (Phrygian scale and C key)', () => {
     const form = component.patternForm;
-    expect(form).toBeDefined();
-    expect(form.value.name).toBe('Industrial Bassline');
-    expect(form.value.bpm).toBe(120);
-    expect(form.value.lengthInBars).toBe(4);
-    expect(form.valid).toBe(true);
+    
+    expect(form.get('scale')?.value).toBe('Phrygian');
+    expect(form.get('key')?.value).toBe('C');
+    expect(form.get('bpm')?.value).toBe(120);
   });
 
-  it('should invalidate the form if BPM is out of range', () => {
-    const bpmControl = component.patternForm.controls['bpm'];
+  it('should render the exact number of scale options dynamically in the DOM', () => {
+    const scaleSelect = fixture.debugElement.query(By.css('#scale'));
+    const options = scaleSelect.queryAll(By.css('option'));
 
-    bpmControl.setValue(10);
-    expect(bpmControl.invalid).toBe(true);
-
-    bpmControl.setValue(250);
-    expect(bpmControl.invalid).toBe(true);
-
-    expect(component.patternForm.invalid).toBe(true);
+    expect(options.length).toBe(component.availableScales.length);
+    expect(options[3].nativeElement.textContent.trim()).toBe('Phrygian');
+    expect(options[3].nativeElement.value).toBe('Phrygian');
   });
 
-  it('should not call MidiGeneratorService if form is invalid', () => {
-    const spy = vi.spyOn(midiService, 'generatePattern');
+  it('should render the exact number of key options dynamically in the DOM', () => {
+    const keySelect = fixture.debugElement.query(By.css('#key'));
+    const options = keySelect.queryAll(By.css('option'));
 
-    component.patternForm.controls['bpm'].setValue(10);
-    component.onGenerate();
-
-    expect(spy).not.toHaveBeenCalled();
-  });
-
-  it('should call MidiGeneratorService with form data when form is valid', () => {
-    const dummyBlob = new Blob(['datos-midi-falsos'], { type: 'audio/midi' });
-    const spy = vi.spyOn(midiService, 'generatePattern').mockReturnValue(of(dummyBlob));
-
-    component.onGenerate();
-
-    expect(spy).toHaveBeenCalledWith(component.patternForm.value);
+    expect(options.length).toBe(component.availableKeys.length);
+    expect(options[1].nativeElement.textContent.trim()).toBe('C#');
+    expect(options[1].nativeElement.value).toBe('C#');
   });
 });

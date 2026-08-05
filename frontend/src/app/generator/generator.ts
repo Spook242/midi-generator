@@ -11,24 +11,26 @@ import { MidiGeneratorService } from '../services/midi-generator';
 })
 export class GeneratorComponent {
   patternForm: FormGroup;
+  availableScales = ['Major', 'Minor', 'Harmonic Minor', 'Phrygian', 'Dorian', 'Minor Pentatonic', 'Locrian', 'Chromatic'];
+  availableKeys = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
   constructor(private fb: FormBuilder, private midiService: MidiGeneratorService) {
-  this.patternForm = this.fb.group({
-  name: ['Industrial Bassline', Validators.required],
-  bpm: [120, [
-    Validators.required,
-    Validators.min(60),
-    Validators.max(200)
-  ]],
-  lengthInBars: [4, [
-    Validators.required,
-    Validators.min(1),
-    Validators.max(16)
-  ]],
-  scale: ['Major', Validators.required],
-  key: ['C', Validators.required]
-});
-}
+    this.patternForm = this.fb.group({
+      name: ['Industrial Bassline', Validators.required],
+      bpm: [120, [
+        Validators.required,
+        Validators.min(60),
+        Validators.max(200)
+      ]],
+      lengthInBars: [4, [
+        Validators.required,
+        Validators.min(1),
+        Validators.max(16)
+      ]],
+      scale: ['Phrygian', Validators.required], 
+      key: ['C', Validators.required]
+    });
+  }
 
   onGenerate() {
     if (this.patternForm.valid) {
