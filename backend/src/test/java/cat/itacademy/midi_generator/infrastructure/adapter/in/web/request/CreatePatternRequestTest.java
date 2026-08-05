@@ -5,6 +5,8 @@ import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,34 +20,16 @@ class CreatePatternRequestTest {
         validator = factory.getValidator();
     }
 
-    @Test
-    void givenValidRequest_whenValidated_thenNoViolations() {
-        var request = new CreatePatternRequest("Industrial Bassline", 120);
-        var violations = validator.validate(request);
-        assertThat(violations).isEmpty();
-    }
-
-    @Test
-    void givenBlankName_whenValidated_thenHasViolation() {
-        var request = new CreatePatternRequest("", 120);
+    @ParameterizedTest
+    @CsvSource({
+            "'' , 120",
+            "'Industrial Bassline', 30",
+            "'Industrial Bassline', 250"
+    })
+    void givenInvalidRequest_whenValidated_thenHasViolation(String name, int bpm) {
+        var request = new CreatePatternRequest(name, bpm, "C", "Major", 4);
         var violations = validator.validate(request);
         assertThat(violations).isNotEmpty();
-        assertThat(violations).anyMatch(v -> v.getPropertyPath().toString().equals("name"));
-    }
-
-    @Test
-    void givenBpmBelowMinimum_whenValidated_thenHasViolation() {
-        var request = new CreatePatternRequest("Industrial Bassline", 30);
-        var violations = validator.validate(request);
-        assertThat(violations).isNotEmpty();
-        assertThat(violations).anyMatch(v -> v.getPropertyPath().toString().equals("bpm"));
-    }
-
-    @Test
-    void givenBpmAboveMaximum_whenValidated_thenHasViolation() {
-        var request = new CreatePatternRequest("Industrial Bassline", 250);
-        var violations = validator.validate(request);
-        assertThat(violations).isNotEmpty();
-        assertThat(violations).anyMatch(v -> v.getPropertyPath().toString().equals("bpm"));
+        assertThat(violations).anyMatch(v -> v.getPropertyPath().toString().equals(name.isEmpty() ? "name" : "bpm"));
     }
 }
