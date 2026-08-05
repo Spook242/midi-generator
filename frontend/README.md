@@ -63,8 +63,6 @@ Este proyecto consiste en un motor de generación programática de secuencias y 
 Interfaz de Usuario (UI)
 La aplicación cuenta con una interfaz web moderna, limpia y diseñada en modo oscuro para integrarse de forma natural en el flujo de trabajo de cualquier productor musical. El dashboard principal está estructurado en tres áreas clave:
 
-![alt text](image.png)
-
 1. Creador de Patrones (Create New Pattern)
 El panel izquierdo actúa como el motor de generación. Aquí el usuario define los parámetros creativos antes de generar la secuencia:
 
