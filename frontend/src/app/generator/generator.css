@@ -53,11 +53,9 @@
 }
 
 .main-content {
-  display: grid;
-  grid-template-columns: 300px 1fr 320px;
-  gap: 1.5rem;
-  flex: 1;
-  min-height: 0;
+    display: grid;
+    grid-template-columns: 300px 1fr 240px;
+    gap: 1.5rem;
 }
 
 .panel {
