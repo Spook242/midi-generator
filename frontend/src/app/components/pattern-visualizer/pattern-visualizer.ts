@@ -44,7 +44,7 @@ export class PatternVisualizerComponent implements OnInit, OnChanges {
   'C2'
 ];
 
-  steps: number[] = Array.from({ length: 16 }, (_, i) => i + 1);
+  steps: number[] = [];
 
   grid: boolean[][] = [];
 
@@ -56,17 +56,42 @@ export class PatternVisualizerComponent implements OnInit, OnChanges {
   }
 
   toggleCell(row: number, column: number): void {
+
     this.grid[row][column] = !this.grid[row][column];
   }
 
   private drawPreview(): void {
 
+  console.log('Preview inside visualizer:', this.preview);
+
   this.clearGrid();
+
+  const totalSteps =
+  Math.max(...this.preview!.notes.map(note => note.startPosition + note.duration));
+
+this.steps = Array.from(
+  { length: totalSteps },
+  (_, i) => i + 1
+);
+
+this.grid = this.notes.map(() =>
+  Array(this.steps.length).fill(false)
+);
+
+console.log(this.preview?.notes[0]);
 
   for (const note of this.preview!.notes) {
 
     const row = this.pitchToRow(note.pitch);
     const column = note.startPosition;
+
+console.log(
+    'pitch:', note.pitch,
+    'row:', row,
+    'column:', column,
+    'duration:', note.duration
+  );
+
 
     if (
       row >= 0 &&
@@ -74,7 +99,15 @@ export class PatternVisualizerComponent implements OnInit, OnChanges {
       column >= 0 &&
       column < this.steps.length
     ) {
-      this.grid[row][column] = true;
+      for (let i = 0; i < note.duration; i++) {
+
+  const currentColumn = column + i;
+
+  if (currentColumn < this.steps.length) {
+    this.grid[row][currentColumn] = true;
+  }
+
+}
     }
   }
 }
@@ -87,10 +120,35 @@ private clearGrid(): void {
 
 private pitchToRow(pitch: number): number {
 
-  const highestPitch = 60;
+  const midiNotes = [
+    72, // C5
+    71,
+    70,
+    69,
+    68,
+    67,
+    66,
+    65,
+    64,
+    63,
+    62,
+    61,
+    60,
+    59,
+    58,
+    57,
+    56,
+    55,
+    54,
+    53,
+    52,
+    51,
+    50,
+    49,
+    48
+  ];
 
-  return highestPitch - pitch;
-
+  return midiNotes.indexOf(pitch);
 }
 
   ngOnChanges(changes: SimpleChanges): void {
