@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { PatternVisualizerComponent } from './pattern-visualizer';
+import { SimpleChange } from '@angular/core';
 
 describe('PatternVisualizerComponent', () => {
   let component: PatternVisualizerComponent;
@@ -50,4 +50,27 @@ describe('PatternVisualizerComponent', () => {
 
     expect(component.grid[0][0]).toBe(false);
   });
+
+  it('should activate the correct cell when preview data is received', () => {
+
+  component.preview = {
+    name: 'Test Pattern',
+    bpm: 120,
+    notes: [
+      {
+        pitch: 60,
+        velocity: 100,
+        startPosition: 0,
+        duration: 1
+      }
+    ]
+  };
+
+  component.ngOnChanges({
+    preview: new SimpleChange(null, component.preview, true)
+  });
+
+  expect(component.grid[0][0]).toBe(true);
+
+});
 });

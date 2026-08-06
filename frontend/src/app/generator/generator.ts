@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { debounceTime } from 'rxjs';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MidiGeneratorService } from '../services/midi-generator';
 import { PatternVisualizerComponent } from '../components/pattern-visualizer/pattern-visualizer';
+import { PatternPreview } from '../models/pattern-preview';
 
 
 
@@ -15,8 +17,9 @@ import { PatternVisualizerComponent } from '../components/pattern-visualizer/pat
   templateUrl: './generator.html',
   styleUrls: ['./generator.css']
 })
-export class GeneratorComponent {
+export class GeneratorComponent implements OnInit {
   patternForm: FormGroup;
+  preview: PatternPreview | null = null;
   availableScales = ['Major', 'Minor', 'Harmonic Minor', 'Phrygian', 'Dorian', 'Minor Pentatonic', 'Locrian', 'Chromatic'];
   availableKeys = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
@@ -37,6 +40,42 @@ export class GeneratorComponent {
       key: ['C', Validators.required]
     });
   }
+
+  ngOnInit(): void {
+
+    if (this.patternForm.valid) {
+  this.midiService.previewPattern(this.patternForm.value).subscribe({
+    next: preview => this.preview = preview,
+    error: err => console.error(err)
+  });
+}
+
+  this.patternForm.valueChanges
+    .pipe(
+      debounceTime(300)
+    )
+    .subscribe(formValues => {
+
+      if (this.patternForm.invalid) {
+        return;
+      }
+
+      this.midiService.previewPattern(formValues).subscribe({
+
+        next: preview => {
+          this.preview = preview;
+          console.log('Preview received:', preview);
+        },
+
+        error: err => {
+          console.error('Preview error:', err);
+        }
+
+      });
+
+    });
+
+}
 
   onGenerate() {
     if (this.patternForm.valid) {
