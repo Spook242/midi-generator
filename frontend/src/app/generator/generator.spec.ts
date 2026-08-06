@@ -13,8 +13,16 @@ describe('GeneratorComponent', () => {
 
   beforeEach(async () => {
     mockMidiService = {
-      generatePattern: vi.fn().mockReturnValue(of(new Blob()))
-    };
+  generatePattern: vi.fn().mockReturnValue(of(new Blob())),
+
+  previewPattern: vi.fn().mockReturnValue(
+    of({
+      name: 'Test',
+      bpm: 120,
+      notes: []
+    })
+  )
+};
 
     await TestBed.configureTestingModule({
       imports: [GeneratorComponent, ReactiveFormsModule],

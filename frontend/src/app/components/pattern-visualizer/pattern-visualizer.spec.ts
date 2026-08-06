@@ -37,19 +37,50 @@ describe('PatternVisualizerComponent', () => {
   });
 
   it('should toggle a cell from false to true', () => {
-    expect(component.grid[0][0]).toBe(false);
 
-    component.toggleCell(0, 0);
+  expect(component.grid).toBeDefined();
+  expect(component.grid.length).toBeGreaterThan(0);
 
-    expect(component.grid[0][0]).toBe(true);
-  });
+  component.toggleCell(0, 0);
 
+  expect(component.grid[0][0]).toBe(true);
+
+});
   it('should toggle a cell back to false', () => {
     component.toggleCell(0, 0);
     component.toggleCell(0, 0);
 
     expect(component.grid[0][0]).toBe(false);
   });
+
+  it('should draw a preview note with its duration', () => {
+
+  component.preview = {
+    name: 'Test',
+    bpm: 120,
+    notes: [
+  {
+    pitch: 60,
+    velocity: 127,
+    startPosition: 2,
+    duration: 2
+  },
+  {
+    pitch: 60,
+    velocity: 127,
+    startPosition: 6,
+    duration: 1
+      }
+    ]
+  };
+
+  component.ngOnChanges({});
+
+  expect(component.grid[12][2]).toBe(true);
+  expect(component.grid[12][3]).toBe(true);
+  expect(component.grid[12][4]).toBe(false);
+
+});
 
   it('should activate the correct cell when preview data is received', () => {
 
@@ -70,7 +101,7 @@ describe('PatternVisualizerComponent', () => {
     preview: new SimpleChange(null, component.preview, true)
   });
 
-  expect(component.grid[0][0]).toBe(true);
+  expect(component.grid[12][0]).toBe(true);
 
 });
 });
