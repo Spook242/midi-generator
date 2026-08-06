@@ -21,6 +21,7 @@ public class CreatePatternService implements CreatePatternUseCase {
 
     @Override
     public MidiPattern createPattern(CreatePatternCommand command) {
+
         MidiPattern pattern = new MidiPattern(command.name(), command.bpm());
 
         PitchClass rootPitch = PitchClass.fromString(command.key());
@@ -29,11 +30,18 @@ public class CreatePatternService implements CreatePatternUseCase {
 
         int totalSteps = command.lengthInBars() * 16;
 
-        for (int i = 0; i < totalSteps; i++) {
+        for (int i = 0; i < totalSteps; i += 2) {
+
             int pitch = availablePitches.get((i / 2) % availablePitches.size());
             int velocity = (i % 4 == 0) ? 127 : 85;
 
-            Note note = new Note(pitch, velocity, i, 1);
+            Note note = new Note(
+                    pitch,
+                    velocity,
+                    i,
+                    2
+            );
+
             pattern.addNote(note);
         }
 
@@ -41,4 +49,5 @@ public class CreatePatternService implements CreatePatternUseCase {
 
         return pattern;
     }
+
 }
