@@ -1,11 +1,15 @@
 package cat.itacademy.midi_generator.infrastructure.adapter.in.web;
 
+import cat.itacademy.midi_generator.infrastructure.adapter.in.web.response.NoteResponse;
+import cat.itacademy.midi_generator.infrastructure.adapter.in.web.response.PatternPreviewResponse;
 import cat.itacademy.midi_generator.application.port.in.CreatePatternUseCase;
 import cat.itacademy.midi_generator.application.port.in.CreatePatternUseCase.CreatePatternCommand;
 import cat.itacademy.midi_generator.domain.MidiPattern;
 import cat.itacademy.midi_generator.domain.Note;
 import cat.itacademy.midi_generator.infrastructure.adapter.in.web.request.CreatePatternRequest;
+
 import jakarta.validation.Valid;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -14,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.sound.midi.*;
 import java.io.ByteArrayOutputStream;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/patterns")
@@ -24,6 +29,38 @@ public class PatternController {
 
     public PatternController(CreatePatternUseCase createPatternUseCase) {
         this.createPatternUseCase = createPatternUseCase;
+    }
+
+    @PostMapping("/preview")
+    public ResponseEntity<PatternPreviewResponse> previewPattern(
+            @Valid @RequestBody CreatePatternRequest request) {
+
+        var command = new CreatePatternUseCase.CreatePatternCommand(
+                request.name(),
+                request.bpm(),
+                request.key(),
+                request.scale(),
+                request.lengthInBars()
+        );
+
+        MidiPattern pattern = createPatternUseCase.createPattern(command);
+
+        List<NoteResponse> notes = pattern.getNotes().stream()
+                .map(note -> new NoteResponse(
+                        note.pitch(),
+                        note.velocity(),
+                        note.startPosition(),
+                        note.duration()
+                ))
+                .toList();
+
+        PatternPreviewResponse response = new PatternPreviewResponse(
+                pattern.getName(),
+                pattern.getBpm(),
+                notes
+        );
+
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping
