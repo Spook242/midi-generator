@@ -1,8 +1,13 @@
+:host {
+  display: block;
+  height: 100%;
+  min-height: 0;
+}
+
 .visualizer {
-  width: 100%;
-  min-width: 0;
-  overflow-x: auto;
-  overflow-y: hidden;
+  height: 100%;
+  min-height: 0;
+  overflow: auto;
 }
 
 .header {
@@ -73,11 +78,4 @@
 
 .cell.active{
     background:#0066ff;
-}
-
-.center-panel {
-  min-width: 0;
-  max-width: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
 }
