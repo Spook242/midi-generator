@@ -54,7 +54,7 @@
 
 .main-content {
     display: grid;
-    grid-template-columns: 300px 1fr 240px;
+    grid-template-columns: 300px minmax(0, 1fr) 240px;
     gap: 1.5rem;
 }
 
@@ -191,7 +191,6 @@ label {
   cursor: not-allowed;
 }
 
-/* Estilos para inputs inválidos (Angular + HTML5 nativo) */
 input.dark-input.ng-invalid.ng-dirty,
 input.dark-input.ng-invalid.ng-touched,
 input.dark-input:out-of-range,
