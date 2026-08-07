@@ -42,20 +42,26 @@
     font-weight:500;
 }
 
-.cell{
-    width:28px;
-    height:28px;
+.cell {
+  width: 28px;
+  height: 28px;
 
-    margin-right:4px;
+  margin-right: 4px;
 
-    border-radius:4px;
+  border-radius: 4px;
 
-    background:#454545;
+  background: #454545;
 
-    cursor:pointer;
-    transition:.15s;
+  cursor: pointer;
+  transition: .15s;
+
+  flex-shrink: 0;
 }
 
+.cell.note {
+  width: calc(var(--note-duration) * 28px + (var(--note-duration) - 1) * 4px);
+  background: #0066ff;
+}
 .cell:hover{
     background:#666;
 }

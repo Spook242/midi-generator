@@ -47,18 +47,31 @@ export class PatternVisualizerComponent implements OnInit, OnChanges {
   steps: number[] = [];
 
   grid: boolean[][] = [];
+  noteDurations: number[][] = [];
 
   ngOnInit(): void {
-    
-    this.grid = this.notes.map(() =>
-      Array(this.steps.length).fill(false)
-    );
-  }
+  this.grid = this.notes.map(() =>
+  Array(this.steps.length).fill(false)
+);
+
+  this.noteDurations = this.notes.map(() =>
+  Array(this.steps.length).fill(0)
+);
+}
 
   toggleCell(row: number, column: number): void {
 
     this.grid[row][column] = !this.grid[row][column];
+    
   }
+
+  getNoteDuration(row: number, column: number): number {
+  return this.noteDurations[row]?.[column] ?? 0;
+}
+
+  isNoteStart(row: number, column: number): boolean {
+  return this.getNoteDuration(row, column) > 0;
+}
 
   private drawPreview(): void {
 
@@ -69,7 +82,7 @@ export class PatternVisualizerComponent implements OnInit, OnChanges {
   const totalSteps =
   Math.max(...this.preview!.notes.map(note => note.startPosition + note.duration));
 
-this.steps = Array.from(
+  this.steps = Array.from(
   { length: totalSteps },
   (_, i) => i + 1
 );
@@ -85,31 +98,25 @@ console.log(this.preview?.notes[0]);
     const row = this.pitchToRow(note.pitch);
     const column = note.startPosition;
 
-console.log(
-    'pitch:', note.pitch,
-    'row:', row,
-    'column:', column,
-    'duration:', note.duration
-  );
+if (
+  row >= 0 &&
+  row < this.grid.length &&
+  column >= 0 &&
+  column < this.steps.length
+) {
 
+  this.noteDurations[row][column] = note.duration;
 
-    if (
-      row >= 0 &&
-      row < this.grid.length &&
-      column >= 0 &&
-      column < this.steps.length
-    ) {
-      for (let i = 0; i < note.duration; i++) {
+  for (let i = 0; i < note.duration; i++) {
 
-  const currentColumn = column + i;
+    const currentColumn = column + i;
 
-  if (currentColumn < this.steps.length) {
-    this.grid[row][currentColumn] = true;
-  }
-
-}
+    if (currentColumn < this.steps.length) {
+      this.grid[row][currentColumn] = true;
     }
   }
+}
+}
 }
 
 private clearGrid(): void {
@@ -119,7 +126,6 @@ private clearGrid(): void {
 }
 
 private pitchToRow(pitch: number): number {
-
   const midiNotes = [
     72, // C5
     71,
@@ -159,5 +165,25 @@ private pitchToRow(pitch: number): number {
 
   this.drawPreview();
 
+}
+
+getNoteDurationAt(row: number, column: number): number {
+  const duration = this.getNoteDuration(row, column);
+
+  if (duration > 0) {
+    return duration;
+  }
+
+  for (let start = column - 1; start >= 0; start--) {
+    const noteDuration = this.getNoteDuration(row, start);
+
+    if (noteDuration > 0) {
+      const distance = column - start;
+
+      return distance < noteDuration ? noteDuration - distance : 0;
+    }
+  }
+
+  return 0;
 }
 }

@@ -82,6 +82,26 @@ describe('PatternVisualizerComponent', () => {
 
 });
 
+it('should store the duration of a note at its starting position', () => {
+
+  component.preview = {
+    name: 'Test',
+    bpm: 120,
+    notes: [
+      {
+        pitch: 60,
+        velocity: 127,
+        startPosition: 2,
+        duration: 2
+      }
+    ]
+  };
+
+  component.ngOnChanges({});
+
+  expect(component.getNoteDuration(12, 2)).toBe(2);
+});
+
   it('should activate the correct cell when preview data is received', () => {
 
   component.preview = {
