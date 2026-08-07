@@ -26,6 +26,16 @@
 
       @for (step of steps; track step; let column = $index) {
 
+  @if (getNoteDuration(row, column) > 0) {
+
+    <div
+      class="cell note"
+      [style.--note-duration]="getNoteDuration(row, column)"
+      (click)="toggleCell(row, column)">
+    </div>
+
+   } @else if (getNoteDurationAt(row, column) === 0) {
+
         <div
           class="cell"
           [class.active]="grid[row][column]"
@@ -34,8 +44,8 @@
 
       }
 
-    </div>
+    }
 
-  }
+  </div>
 
-</div>
+}
