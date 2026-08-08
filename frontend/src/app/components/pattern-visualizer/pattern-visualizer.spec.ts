@@ -51,30 +51,38 @@ describe('PatternVisualizerComponent', () => {
     ]);
   });
 
-  it('should start with an empty grid', () => {
-    expect(component.steps).toEqual([]);
-    expect(component.grid).toEqual([]);
-    expect(component.noteDurations).toEqual([]);
+  it('should initialize an empty piano roll', () => {
+  expect(component.steps).toHaveLength(64);
+  expect(component.grid).toHaveLength(component.notes.length);
+  expect(component.grid.every(row => row.length === 64)).toBe(true);
+
+  expect(
+    component.grid.every(row => row.every(cell => cell === false))
+  ).toBe(true);
+
+  expect(component.noteDurations).toHaveLength(component.notes.length);
+
+  expect(
+    component.noteDurations.every(row =>
+      row.every(duration => duration === 0)
+    )
+  ).toBe(true);
+  });
+
+  it('should start without a preview', () => {
+  expect(component.preview).toBeNull();
   });
 
   it('should toggle a grid cell', () => {
-    component.steps = [1, 2, 3];
+  component.toggleCell(0, 0);
 
-    component.grid = component.notes.map(() =>
-      Array(component.steps.length).fill(false)
-    );
+  expect(component.grid[0][0]).toBe(true);
 
-    expect(component.grid[0][0]).toBe(false);
+  component.toggleCell(0, 0);
 
-    component.toggleCell(0, 0);
-
-    expect(component.grid[0][0]).toBe(true);
-
-    component.toggleCell(0, 0);
-
-    expect(component.grid[0][0]).toBe(false);
+  expect(component.grid[0][0]).toBe(false);
   });
-
+  
   it('should return zero when a note duration does not exist', () => {
     expect(component.getNoteDuration(0, 0)).toBe(0);
   });
@@ -109,7 +117,7 @@ describe('PatternVisualizerComponent', () => {
     expect(component.grid[5][4]).toBe(true);
   });
 
-it('should store note durations in the correct cells', () => {
+  it('should store note durations in the correct cells', () => {
     fixture.componentRef.setInput('preview', {
       name: 'Test Pattern',
       bpm: 120,
