@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { PatternVisualizerComponent } from './pattern-visualizer';
-import { SimpleChange } from '@angular/core';
 
 describe('PatternVisualizerComponent', () => {
+
   let component: PatternVisualizerComponent;
   let fixture: ComponentFixture<PatternVisualizerComponent>;
 
@@ -13,6 +13,7 @@ describe('PatternVisualizerComponent', () => {
 
     fixture = TestBed.createComponent(PatternVisualizerComponent);
     component = fixture.componentInstance;
+
     fixture.detectChanges();
   });
 
@@ -20,108 +21,153 @@ describe('PatternVisualizerComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should initialize the grid with the correct dimensions', () => {
-    expect(component.grid.length).toBe(component.notes.length);
-
-    component.grid.forEach(row => {
-      expect(row.length).toBe(component.steps.length);
-    });
+  it('should contain the expected piano roll notes', () => {
+    expect(component.notes).toEqual([
+      'C4',
+      'B3',
+      'A#3',
+      'A3',
+      'G#3',
+      'G3',
+      'F#3',
+      'F3',
+      'E3',
+      'D#3',
+      'D3',
+      'C#3',
+      'C3',
+      'B2',
+      'A#2',
+      'A2',
+      'G#2',
+      'G2',
+      'F#2',
+      'F2',
+      'E2',
+      'D#2',
+      'D2',
+      'C#2',
+      'C2'
+    ]);
   });
 
-  it('should initialize all cells as false', () => {
-    component.grid.forEach(row => {
-      row.forEach(cell => {
-        expect(cell).toBe(false);
-      });
-    });
+  it('should start with an empty grid', () => {
+    expect(component.steps).toEqual([]);
+    expect(component.grid).toEqual([]);
+    expect(component.noteDurations).toEqual([]);
   });
 
-  it('should toggle a cell from false to true', () => {
+  it('should toggle a grid cell', () => {
+    component.steps = [1, 2, 3];
 
-  expect(component.grid).toBeDefined();
-  expect(component.grid.length).toBeGreaterThan(0);
+    component.grid = component.notes.map(() =>
+      Array(component.steps.length).fill(false)
+    );
 
-  component.toggleCell(0, 0);
+    expect(component.grid[0][0]).toBe(false);
 
-  expect(component.grid[0][0]).toBe(true);
-
-});
-  it('should toggle a cell back to false', () => {
     component.toggleCell(0, 0);
+
+    expect(component.grid[0][0]).toBe(true);
+
     component.toggleCell(0, 0);
 
     expect(component.grid[0][0]).toBe(false);
   });
 
-  it('should draw a preview note with its duration', () => {
-
-  component.preview = {
-    name: 'Test',
-    bpm: 120,
-    notes: [
-  {
-    pitch: 60,
-    velocity: 127,
-    startPosition: 2,
-    duration: 2
-  },
-  {
-    pitch: 60,
-    velocity: 127,
-    startPosition: 6,
-    duration: 1
-      }
-    ]
-  };
-
-  component.ngOnChanges({});
-
-  expect(component.grid[12][2]).toBe(true);
-  expect(component.grid[12][3]).toBe(true);
-  expect(component.grid[12][4]).toBe(false);
-
-});
-
-it('should store the duration of a note at its starting position', () => {
-
-  component.preview = {
-    name: 'Test',
-    bpm: 120,
-    notes: [
-      {
-        pitch: 60,
-        velocity: 127,
-        startPosition: 2,
-        duration: 2
-      }
-    ]
-  };
-
-  component.ngOnChanges({});
-
-  expect(component.getNoteDuration(12, 2)).toBe(2);
-});
-
-  it('should activate the correct cell when preview data is received', () => {
-
-  component.preview = {
-    name: 'Test Pattern',
-    bpm: 120,
-    notes: [
-      {
-        pitch: 60,
-        velocity: 100,
-        startPosition: 0,
-        duration: 1
-      }
-    ]
-  };
-
-  component.ngOnChanges({
-    preview: new SimpleChange(null, component.preview, true)
+  it('should return zero when a note duration does not exist', () => {
+    expect(component.getNoteDuration(0, 0)).toBe(0);
   });
 
-  expect(component.grid[12][0]).toBe(true);
+  it('should draw the preview correctly', () => {
+    fixture.componentRef.setInput('preview', {
+      name: 'Test Pattern',
+      bpm: 120,
+      notes: [
+        {
+          pitch: 60,
+          velocity: 100,
+          startPosition: 0,
+          duration: 2
+        },
+        {
+          pitch: 55,
+          velocity: 100,
+          startPosition: 2,
+          duration: 3
+        }
+      ]
+    });
 
-});
+    fixture.detectChanges();
+
+    expect(component.steps).toEqual([1, 2, 3, 4, 5]);
+    expect(component.grid[0][0]).toBe(true);
+    expect(component.grid[0][1]).toBe(true);
+    expect(component.grid[5][2]).toBe(true);
+    expect(component.grid[5][3]).toBe(true);
+    expect(component.grid[5][4]).toBe(true);
+  });
+
+it('should store note durations in the correct cells', () => {
+    fixture.componentRef.setInput('preview', {
+      name: 'Test Pattern',
+      bpm: 120,
+      notes: [
+        {
+          pitch: 60,
+          velocity: 100,
+          startPosition: 1,
+          duration: 4
+        }
+      ]
+    });
+
+    fixture.detectChanges();
+
+    expect(component.getNoteDuration(0, 1)).toBe(4);
+  });
+
+  it('should return the remaining duration of a sustained note', () => {
+    fixture.componentRef.setInput('preview', {
+      name: 'Test Pattern',
+      bpm: 120,
+      notes: [
+        {
+          pitch: 60,
+          velocity: 100,
+          startPosition: 0,
+          duration: 4
+        }
+      ]
+    });
+
+    fixture.detectChanges();
+
+    expect(component.getNoteDurationAt(0, 0)).toBe(4);
+    expect(component.getNoteDurationAt(0, 1)).toBe(3);
+    expect(component.getNoteDurationAt(0, 2)).toBe(2);
+    expect(component.getNoteDurationAt(0, 3)).toBe(1);
+    expect(component.getNoteDurationAt(0, 4)).toBe(0);
+  });
+
+  it('should ignore notes outside the piano roll range', () => {
+    fixture.componentRef.setInput('preview', {
+      name: 'Test Pattern',
+      bpm: 120,
+      notes: [
+        {
+          pitch: 72,
+          velocity: 100,
+          startPosition: 0,
+          duration: 2
+        }
+      ]
+    });
+
+    fixture.detectChanges();
+
+    expect(component.grid.length).toBe(component.notes.length);
+  });
+
 });

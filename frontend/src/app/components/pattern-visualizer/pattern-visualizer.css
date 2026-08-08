@@ -2,54 +2,70 @@
   display: block;
   height: 100%;
   min-height: 0;
+  min-width: 0;
 }
 
 .visualizer {
   height: 100%;
   min-height: 0;
+  min-width: 0;
+
   overflow: auto;
+
+  box-sizing: border-box;
+}
+
+.piano-roll {
+  width: max-content;
+  min-width: max-content;
 }
 
 .header {
   display: flex;
   align-items: center;
-  margin-bottom: 10px;
+
+  margin-bottom: 4px;
+
   width: max-content;
 }
 
-.note-title{
-    width:60px;
-    flex-shrink:0;
+.note-title {
+  width: 60px;
+  flex-shrink: 0;
 }
 
-.step-number{
-    width:28px;
-    height:28px;
+.step-number {
+  width: 28px;
+  height: 28px;
 
-    display:flex;
-    justify-content:center;
-    align-items:center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
-    margin-right:4px;
+  margin-right: 4px;
 
-    color:#8f95a3;
-    font-size:13px;
+  color: #8f95a3;
+  font-size: 13px;
+
+  flex-shrink: 0;
 }
 
 .note-row {
   display: flex;
   align-items: center;
-  margin-bottom: 4px;
+
   width: max-content;
+
+  margin-bottom: 4px;
 }
 
-.note-name{
-    width:60px;
-    flex-shrink:0;
+.note-name {
+  width: 60px;
+  flex-shrink: 0;
 
-    color:white;
-    font-size:14px;
-    font-weight:500;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .cell {
@@ -58,24 +74,30 @@
 
   margin-right: 4px;
 
+  flex-shrink: 0;
+
   border-radius: 4px;
 
   background: #454545;
 
   cursor: pointer;
-  transition: .15s;
 
-  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.cell:hover {
+  background: #666;
+}
+
+.cell.active {
+  background: #0066ff;
 }
 
 .cell.note {
-  width: calc(var(--note-duration) * 28px + (var(--note-duration) - 1) * 4px);
-  background: #0066ff;
-}
-.cell:hover{
-    background:#666;
-}
+  width: calc(
+    var(--note-duration) * 28px +
+    (var(--note-duration) - 1) * 4px
+  );
 
-.cell.active{
-    background:#0066ff;
+  background: #0066ff;
 }

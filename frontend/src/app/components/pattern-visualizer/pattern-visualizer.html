@@ -1,51 +1,46 @@
 <div class="visualizer">
+  <div class="piano-roll">
 
-  <h2>Pattern Visualizer</h2>
+    <div class="header">
+      <div class="note-title"></div>
 
-  <div class="header">
-
-    <div class="note-title"></div>
-
-    @for (step of steps; track step) {
-
-      <div class="step-number">
-        {{ step }}
-      </div>
-
-    }
-
-  </div>
-
-  @for (note of notes; track note; let row = $index) {
-
-    <div class="note-row">
-
-      <div class="note-name">
-        {{ note }}
-      </div>
-
-      @for (step of steps; track step; let column = $index) {
-
-  @if (getNoteDuration(row, column) > 0) {
-
-    <div
-      class="cell note"
-      [style.--note-duration]="getNoteDuration(row, column)"
-      (click)="toggleCell(row, column)">
+      @for (step of steps; track step) {
+        <div class="step-number">
+          {{ step }}
+        </div>
+      }
     </div>
 
-   } @else if (getNoteDurationAt(row, column) === 0) {
+    @for (note of notes; track note; let row = $index) {
+      <div class="note-row">
 
-        <div
-          class="cell"
-          [class.active]="grid[row][column]"
-          (click)="toggleCell(row, column)">
+        <div class="note-name">
+          {{ note }}
         </div>
 
-      }
+        @for (step of steps; track step; let column = $index) {
 
+          @if (getNoteDuration(row, column) > 0) {
+
+            <div
+              class="cell note"
+              [style.--note-duration]="getNoteDuration(row, column)"
+              (click)="toggleCell(row, column)">
+            </div>
+
+          } @else if (getNoteDurationAt(row, column) === 0) {
+
+            <div
+              class="cell"
+              [class.active]="grid[row][column]"
+              (click)="toggleCell(row, column)">
+            </div>
+
+          }
+
+        }
+      </div>
     }
 
   </div>
-
-}
+</div>
