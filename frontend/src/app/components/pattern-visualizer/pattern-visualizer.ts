@@ -44,11 +44,15 @@ export class PatternVisualizerComponent implements OnChanges {
     'C2'
   ];
 
-  steps: number[] = [];
+  steps: number[] = Array.from({ length: 64 }, (_, i) => i + 1);
 
-  grid: boolean[][] = [];
+  grid: boolean[][] = this.notes.map(() =>
+  Array(this.steps.length).fill(false)
+  );
 
-  noteDurations: number[][] = [];
+  noteDurations: number[][] = this.notes.map(() =>
+  Array(this.steps.length).fill(0)
+  );
 
   toggleCell(row: number, column: number): void {
     this.grid[row][column] = !this.grid[row][column];

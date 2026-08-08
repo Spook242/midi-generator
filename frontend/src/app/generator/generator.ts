@@ -91,9 +91,17 @@ export class GeneratorComponent implements OnInit {
 
   ngOnInit(): void {
 
-    if (this.patternForm.valid) {
+  this.patternForm.valueChanges
+    .pipe(
+      debounceTime(300)
+    )
+    .subscribe(formValues => {
 
-      this.midiService.previewPattern(this.patternForm.value).subscribe({
+      if (this.patternForm.invalid) {
+        return;
+      }
+
+      this.midiService.previewPattern(formValues).subscribe({
         next: preview => {
           this.preview = preview;
           this.cdr.detectChanges();
@@ -103,33 +111,9 @@ export class GeneratorComponent implements OnInit {
           console.error('Preview error:', err);
         }
       });
-    }
 
-    this.patternForm.valueChanges
-      .pipe(
-        debounceTime(300)
-      )
-      .subscribe(formValues => {
-
-        if (this.patternForm.invalid) {
-          return;
-        }
-
-        this.midiService.previewPattern(formValues).subscribe({
-
-          next: preview => {
-            this.preview = preview;
-            this.cdr.detectChanges();
-          },
-
-          error: err => {
-            console.error('Preview error:', err);
-          }
-
-        });
-
-      });
-  }
+    });
+}
 
   onGenerate(): void {
 
