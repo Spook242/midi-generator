@@ -40,10 +40,10 @@ describe('PatternGridService', () => {
     });
   });
 
-  describe('setNoteDuration()', () => {
-    it('should update the duration and the visual grid', () => {
-      service.toggleCell(24, 0);
-      service.setNoteDuration(24, 0, 4);
+  describe('updateNoteBounds()', () => {
+    it('should update the duration without moving the start column (right drag)', () => {
+      service.toggleCell(24, 0); // Fila 24, Columna 0
+      service.updateNoteBounds(24, 0, 0, 4); // oldCol: 0, newCol: 0, duration: 4
       
       expect(service.noteDurations[24][0]).toBe(4);
       expect(service.grid[24][0]).toBe(true);
@@ -51,6 +51,19 @@ describe('PatternGridService', () => {
       expect(service.grid[24][2]).toBe(true);
       expect(service.grid[24][3]).toBe(true);
       expect(service.grid[24][4]).toBe(false);
+    });
+
+    it('should move the note to a new column and update duration (left drag)', () => {
+      service.toggleCell(24, 2); // Initial note at col 2
+      service.updateNoteBounds(24, 2, 0, 4); // moved to col 0, duration 4
+
+      expect(service.noteDurations[24][2]).toBe(0); // Old note start removed
+      expect(service.noteDurations[24][0]).toBe(4); // New note start saved
+      
+      expect(service.grid[24][0]).toBe(true);
+      expect(service.grid[24][1]).toBe(true);
+      expect(service.grid[24][2]).toBe(true);
+      expect(service.grid[24][3]).toBe(true);
     });
   });
 

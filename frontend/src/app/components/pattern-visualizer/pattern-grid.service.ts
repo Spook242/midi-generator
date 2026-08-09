@@ -44,18 +44,25 @@ export class PatternGridService {
     return this.getNoteDuration(row, column) > 0;
   }
 
-  setNoteDuration(row: number, column: number, duration: number): void {
-    const oldDuration = this.noteDurations[row][column];
-
-    for (let i = 0; i < oldDuration && column + i < this.steps.length; i++) {
-      this.grid[row][column + i] = false;
+  updateNoteBounds(row: number, oldColumn: number, newColumn: number, newDuration: number): void {
+    if (oldColumn === newColumn && this.getNoteDuration(row, oldColumn) === newDuration) {
+      return;
     }
 
-    this.noteDurations[row][column] = duration;
-    this.manualNoteDurations[row][column] = duration;
+    const oldDuration = this.noteDurations[row][oldColumn];
+    if (oldDuration > 0) {
+      for (let i = 0; i < oldDuration && oldColumn + i < this.steps.length; i++) {
+        this.grid[row][oldColumn + i] = false;
+      }
+      this.noteDurations[row][oldColumn] = 0;
+      this.manualNoteDurations[row][oldColumn] = 0;
+    }
 
-    for (let i = 0; i < duration && column + i < this.steps.length; i++) {
-      this.grid[row][column + i] = true;
+      this.noteDurations[row][newColumn] = newDuration;
+      this.manualNoteDurations[row][newColumn] = newDuration;
+
+    for (let i = 0; i < newDuration && newColumn + i < this.steps.length; i++) {
+      this.grid[row][newColumn + i] = true;
     }
   }
 

@@ -28,8 +28,14 @@
               (click)="gridService.toggleCell(row, column)">
 
               <span
-                class="resize-handle"
-                (mousedown)="startResize($event, row, column)"
+                class="resize-handle left"
+                (mousedown)="startResize($event, row, column, 'left')"
+                (click)="$event.stopPropagation()">
+              </span>
+              
+              <span
+                class="resize-handle right"
+                (mousedown)="startResize($event, row, column, 'right')"
                 (click)="$event.stopPropagation()">
               </span>
 
