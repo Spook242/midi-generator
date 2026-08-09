@@ -4,7 +4,7 @@
     <div class="header">
       <div class="note-title"></div>
 
-      @for (step of steps; track step) {
+      @for (step of gridService.steps; track step) {
         <div class="step-number">
           {{ step }}
         </div>
@@ -18,14 +18,14 @@
           {{ note }}
         </div>
 
-        @for (step of steps; track step; let column = $index) {
+        @for (step of gridService.steps; track step; let column = $index) {
 
-          @if (getNoteDuration(row, column) > 0) {
+          @if (gridService.getNoteDuration(row, column) > 0) {
 
             <div
               class="cell note"
-              [style.--note-duration]="getNoteDuration(row, column)"
-              (click)="toggleCell(row, column)">
+              [style.--note-duration]="gridService.getNoteDuration(row, column)"
+              (click)="gridService.toggleCell(row, column)">
 
               <span
                 class="resize-handle"
@@ -35,15 +35,15 @@
 
             </div>
 
-          } @else if (getNoteDurationAt(row, column) === 0) {
+          } @else if (gridService.getNoteDurationAt(row, column) === 0) {
 
             <div
               class="cell"
-              [class.active]="grid[row][column]"
-              (click)="toggleCell(row, column)">
+              [class.active]="gridService.grid[row][column]"
+              (click)="gridService.toggleCell(row, column)">
             </div>
 
-}
+          }
 
         }
       </div>
