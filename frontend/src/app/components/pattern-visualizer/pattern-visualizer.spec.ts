@@ -106,6 +106,29 @@ describe('PatternVisualizerComponent', () => {
 
   expect(component.grid[0][0]).toBe(false);
   });
+
+  it('should preserve manually selected notes when preview changes', () => {
+  component.toggleCell(24, 0);
+
+  expect(component.grid[24][0]).toBe(true);
+
+  fixture.componentRef.setInput('preview', {
+    name: 'Test Pattern',
+    bpm: 120,
+    notes: [
+      {
+        pitch: 55,
+        velocity: 100,
+        startPosition: 2,
+        duration: 2
+      }
+    ]
+  });
+
+  fixture.detectChanges();
+
+  expect(component.grid[24][0]).toBe(true);
+});
   
   it('should return zero when a note duration does not exist', () => {
     expect(component.getNoteDuration(0, 0)).toBe(0);
