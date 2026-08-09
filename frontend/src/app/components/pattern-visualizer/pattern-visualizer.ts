@@ -83,21 +83,9 @@ export class PatternVisualizerComponent implements OnChanges {
     Array(this.steps.length).fill(0)
   );
 
-  /**
-   * Duraciones de las notas creadas manualmente
-   * por el usuario.
-   *
-   * Se mantienen separadas de las notas recibidas
-   * desde el backend para no perderlas cuando cambia
-   * la escala o la tónica.
-   */
   private manualNoteDurations: number[][] = this.notes.map(() =>
     Array(this.steps.length).fill(0)
   );
-
-  // -----------------------------
-  // RESIZE STATE
-  // -----------------------------
 
   private resizing = false;
 
@@ -107,22 +95,12 @@ export class PatternVisualizerComponent implements OnChanges {
   private resizeStartX = 0;
   private resizeInitialDuration = 1;
 
-  /**
-   * Una celda ocupa:
-   * 28px de ancho + 4px de margin-right
-   */
   private readonly CELL_WIDTH = 32;
-
-  // -----------------------------
-  // GRID
-  // -----------------------------
 
   toggleCell(row: number, column: number): void {
 
     const duration = this.getNoteDuration(row, column);
 
-    // Si hay una nota que empieza en esta celda,
-    // la eliminamos.
     if (duration > 0) {
 
       this.noteDurations[row][column] = 0;
@@ -139,22 +117,15 @@ export class PatternVisualizerComponent implements OnChanges {
       return;
     }
 
-    // Si la celda pertenece a una nota sostenida,
-    // no permitimos crear otra nota encima.
     if (this.getNoteDurationAt(row, column) > 0) {
       return;
     }
 
-    // Crear una nota manual de duración 1.
     this.noteDurations[row][column] = 1;
     this.manualNoteDurations[row][column] = 1;
     this.grid[row][column] = true;
   }
 
-  /**
-   * Devuelve la duración de una nota que comienza
-   * exactamente en la posición indicada.
-   */
   getNoteDuration(row: number, column: number): number {
     return this.noteDurations[row]?.[column] ?? 0;
   }
@@ -162,10 +133,6 @@ export class PatternVisualizerComponent implements OnChanges {
   isNoteStart(row: number, column: number): boolean {
     return this.getNoteDuration(row, column) > 0;
   }
-
-  // -----------------------------
-  // RESIZE
-  // -----------------------------
 
   startResize(
     event: MouseEvent,
@@ -207,10 +174,8 @@ export class PatternVisualizerComponent implements OnChanges {
     let newDuration =
       this.resizeInitialDuration + deltaSteps;
 
-    // Mínimo: 1 paso
     newDuration = Math.max(1, newDuration);
 
-    // No permitir salirnos del piano roll.
     const maxDuration =
       this.steps.length - this.resizeColumn;
 
@@ -239,7 +204,6 @@ export class PatternVisualizerComponent implements OnChanges {
     duration: number
   ): void {
 
-    // Limpiar la duración anterior.
     const oldDuration =
       this.noteDurations[row][column];
 
@@ -252,15 +216,10 @@ export class PatternVisualizerComponent implements OnChanges {
       this.grid[row][column + i] = false;
     }
 
-    // Guardar nueva duración.
     this.noteDurations[row][column] = duration;
 
-    // Como esta nota está siendo modificada
-    // manualmente, también actualizamos su duración
-    // persistente.
     this.manualNoteDurations[row][column] = duration;
 
-    // Marcar las nuevas celdas.
     for (
       let i = 0;
       i < duration &&
@@ -270,10 +229,6 @@ export class PatternVisualizerComponent implements OnChanges {
       this.grid[row][column + i] = true;
     }
   }
-
-  // -----------------------------
-  // PREVIEW
-  // -----------------------------
 
   private drawPreview(): void {
 
@@ -285,10 +240,6 @@ export class PatternVisualizerComponent implements OnChanges {
       return;
     }
 
-    /*
-     * Guardamos las notas manuales actuales antes
-     * de reconstruir el grid.
-     */
     const previousManualDurations =
       this.manualNoteDurations;
 
@@ -303,9 +254,6 @@ export class PatternVisualizerComponent implements OnChanges {
       (_, i) => i + 1
     );
 
-    /*
-     * Reconstruimos el grid.
-     */
     this.grid = this.notes.map(() =>
       Array(this.steps.length).fill(false)
     );
@@ -314,13 +262,6 @@ export class PatternVisualizerComponent implements OnChanges {
       Array(this.steps.length).fill(0)
     );
 
-    /*
-     * Conservamos las notas manuales.
-     *
-     * Importante:
-     * si el nuevo preview tiene más o menos steps,
-     * adaptamos la matriz al nuevo tamaño.
-     */
     this.manualNoteDurations = this.notes.map(
       (_, row) =>
         Array.from(
@@ -329,10 +270,6 @@ export class PatternVisualizerComponent implements OnChanges {
             previousManualDurations[row]?.[column] ?? 0
         )
     );
-
-    // -----------------------------
-    // NOTAS DEL BACKEND
-    // -----------------------------
 
     for (const note of this.preview.notes) {
 
@@ -368,10 +305,6 @@ export class PatternVisualizerComponent implements OnChanges {
         }
       }
     }
-
-    // -----------------------------
-    // NOTAS MANUALES
-    // -----------------------------
 
     for (
       let row = 0;
@@ -414,10 +347,6 @@ export class PatternVisualizerComponent implements OnChanges {
       }
     }
   }
-
-  // -----------------------------
-  // MIDI PITCH → ROW
-  // -----------------------------
 
   private pitchToRow(pitch: number): number {
 
@@ -476,10 +405,6 @@ export class PatternVisualizerComponent implements OnChanges {
     return midiNotes.indexOf(pitch);
   }
 
-  // -----------------------------
-  // ANGULAR CHANGES
-  // -----------------------------
-
   ngOnChanges(changes: SimpleChanges): void {
 
     if (
@@ -489,10 +414,6 @@ export class PatternVisualizerComponent implements OnChanges {
       this.drawPreview();
     }
   }
-
-  // -----------------------------
-  // SUSTAINED NOTE
-  // -----------------------------
 
   getNoteDurationAt(
     row: number,
