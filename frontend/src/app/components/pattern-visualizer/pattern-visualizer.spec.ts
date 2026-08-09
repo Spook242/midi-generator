@@ -1,428 +1,94 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { SimpleChange, SimpleChanges } from '@angular/core';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { PatternVisualizerComponent } from './pattern-visualizer';
+import { PatternGridService } from './pattern-grid.service';
+import { PatternPreview } from '../../models/pattern-preview';
 
 describe('PatternVisualizerComponent', () => {
-
   let component: PatternVisualizerComponent;
   let fixture: ComponentFixture<PatternVisualizerComponent>;
+  let gridService: PatternGridService;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PatternVisualizerComponent]
+      imports: [PatternVisualizerComponent],
     }).compileComponents();
 
     fixture = TestBed.createComponent(PatternVisualizerComponent);
     component = fixture.componentInstance;
-
+    gridService = fixture.debugElement.injector.get(PatternGridService);
+    
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it('should create the component', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should contain the expected piano roll notes', () => {
-  expect(component.notes).toEqual([
-    'C6',
-    'B5',
-    'A#5',
-    'A5',
-    'G#5',
-    'G5',
-    'F#5',
-    'F5',
-    'E5',
-    'D#5',
-    'D5',
-    'C#5',
-    'C5',
-    'B4',
-    'A#4',
-    'A4',
-    'G#4',
-    'G4',
-    'F#4',
-    'F4',
-    'E4',
-    'D#4',
-    'D4',
-    'C#4',
-    'C4',
-    'B3',
-    'A#3',
-    'A3',
-    'G#3',
-    'G3',
-    'F#3',
-    'F3',
-    'E3',
-    'D#3',
-    'D3',
-    'C#3',
-    'C3',
-    'B2',
-    'A#2',
-    'A2',
-    'G#2',
-    'G2',
-    'F#2',
-    'F2',
-    'E2',
-    'D#2',
-    'D2',
-    'C#2',
-    'C2'
-  ]);
-});
-
-  it('should initialize an empty piano roll', () => {
-  expect(component.steps).toHaveLength(64);
-  expect(component.grid).toHaveLength(component.notes.length);
-  expect(component.grid.every(row => row.length === 64)).toBe(true);
-
-  expect(
-    component.grid.every(row => row.every(cell => cell === false))
-  ).toBe(true);
-
-  expect(component.noteDurations).toHaveLength(component.notes.length);
-
-  expect(
-    component.noteDurations.every(row =>
-      row.every(duration => duration === 0)
-    )
-  ).toBe(true);
+  describe('ngOnChanges()', () => {
+    it('should delegate drawPreview to gridService when preview input changes', () => {
+      const drawPreviewSpy = vi.spyOn(gridService, 'drawPreview');
+      
+      const mockPreview = { notes: [] } as unknown as PatternPreview;
+      component.preview = mockPreview;
+      
+      const changes: SimpleChanges = {
+        preview: new SimpleChange(null, mockPreview, true)
+      };
+      
+      component.ngOnChanges(changes);
+      
+      expect(drawPreviewSpy).toHaveBeenCalledWith(mockPreview);
+    });
   });
 
-  it('should start without a preview', () => {
-  expect(component.preview).toBeNull();
-  });
+  describe('Mouse Events (Resizing)', () => {
+    it('should initiate resize when clicking on a valid note start', () => {
+      vi.spyOn(gridService, 'getNoteDuration').mockReturnValue(2);
+      
+      const mockEvent = new MouseEvent('mousedown', { clientX: 100 });
+      const preventDefaultSpy = vi.spyOn(mockEvent, 'preventDefault');
+      
+      component.startResize(mockEvent, 0, 0);
+      
+      expect(preventDefaultSpy).toHaveBeenCalled();
 
-  it('should toggle a grid cell', () => {
-  component.toggleCell(0, 0);
-
-  expect(component.grid[0][0]).toBe(true);
-
-  component.toggleCell(0, 0);
-
-  expect(component.grid[0][0]).toBe(false);
-  });
-
-  it('should preserve manually selected notes when preview changes', () => {
-  component.toggleCell(24, 0);
-
-  expect(component.grid[24][0]).toBe(true);
-
-  fixture.componentRef.setInput('preview', {
-    name: 'Test Pattern',
-    bpm: 120,
-    notes: [
-      {
-        pitch: 55,
-        velocity: 100,
-        startPosition: 2,
-        duration: 2
-      }
-    ]
-  });
-
-  fixture.detectChanges();
-
-  expect(component.grid[24][0]).toBe(true);
-});
-  
-  it('should return zero when a note duration does not exist', () => {
-    expect(component.getNoteDuration(0, 0)).toBe(0);
-  });
-
-  it('should draw the preview correctly', () => {
-    fixture.componentRef.setInput('preview', {
-      name: 'Test Pattern',
-      bpm: 120,
-      notes: [
-        {
-          pitch: 60,
-          velocity: 100,
-          startPosition: 0,
-          duration: 2
-        },
-        {
-          pitch: 55,
-          velocity: 100,
-          startPosition: 2,
-          duration: 3
-        }
-      ]
+      expect(component['resizing']).toBe(true);
+      expect(component['resizeRow']).toBe(0);
+      expect(component['resizeColumn']).toBe(0);
     });
 
-    fixture.detectChanges();
-
-    expect(component.steps).toEqual([1, 2, 3, 4, 5]);
-    expect(component.grid[24][0]).toBe(true);
-    expect(component.grid[24][1]).toBe(true);
-    expect(component.grid[29][2]).toBe(true);
-    expect(component.grid[29][3]).toBe(true);
-    expect(component.grid[29][4]).toBe(true);
-  });
-
-  it('should store note durations in the correct cells', () => {
-    fixture.componentRef.setInput('preview', {
-      name: 'Test Pattern',
-      bpm: 120,
-      notes: [
-        {
-          pitch: 60,
-          velocity: 100,
-          startPosition: 1,
-          duration: 4
-        }
-      ]
+    it('should not initiate resize when clicking on an empty cell', () => {
+      vi.spyOn(gridService, 'getNoteDuration').mockReturnValue(0);
+      
+      const mockEvent = new MouseEvent('mousedown');
+      component.startResize(mockEvent, 0, 0);
+      
+      expect(component['resizing']).toBe(false);
     });
 
-    fixture.detectChanges();
-
-    expect(component.getNoteDuration(24, 1)).toBe(4);
-  });
-
-  it('should return the remaining duration of a sustained note', () => {
-    fixture.componentRef.setInput('preview', {
-      name: 'Test Pattern',
-      bpm: 120,
-      notes: [
-        {
-          pitch: 60,
-          velocity: 100,
-          startPosition: 0,
-          duration: 4
-        }
-      ]
+    it('should update note duration on mousemove if currently resizing', () => {
+      vi.spyOn(gridService, 'getNoteDuration').mockReturnValue(2);
+      const setNoteDurationSpy = vi.spyOn(gridService, 'setNoteDuration');
+      
+      const startEvent = new MouseEvent('mousedown', { clientX: 100 });
+      component.startResize(startEvent, 0, 0);
+      
+      const moveEvent = new MouseEvent('mousemove', { clientX: 132 });
+      component.onMouseMove(moveEvent);
+      
+      expect(setNoteDurationSpy).toHaveBeenCalledWith(0, 0, 3);
     });
 
-    fixture.detectChanges();
-
-    expect(component.getNoteDurationAt(24, 0)).toBe(4);
-    expect(component.getNoteDurationAt(24, 1)).toBe(3);
-    expect(component.getNoteDurationAt(24, 2)).toBe(2);
-    expect(component.getNoteDurationAt(24, 3)).toBe(1);
-    expect(component.getNoteDurationAt(24, 4)).toBe(0);
-  });
-
-  it('should ignore notes outside the piano roll range', () => {
-    fixture.componentRef.setInput('preview', {
-      name: 'Test Pattern',
-      bpm: 120,
-      notes: [
-        {
-          pitch: 85,
-          velocity: 100,
-          startPosition: 0,
-          duration: 2
-        }
-      ]
+    it('should stop resizing on mouseup', () => {
+      component['resizing'] = true;
+      
+      component.onMouseUp();
+      
+      expect(component['resizing']).toBe(false);
+      expect(component['resizeRow']).toBe(-1);
+      expect(component['resizeColumn']).toBe(-1);
     });
-
-    fixture.detectChanges();
-
-    expect(component.grid.length).toBe(component.notes.length);
   });
-
-  it('should display notes within the extended piano roll range', () => {
-  fixture.componentRef.setInput('preview', {
-    name: 'Test Pattern',
-    bpm: 120,
-    notes: [
-      {
-        pitch: 72,
-        velocity: 100,
-        startPosition: 0,
-        duration: 2
-      }
-    ]
-  });
-
-  fixture.detectChanges();
-
-  expect(component.grid[12][0]).toBe(true);
-  expect(component.grid[12][1]).toBe(true);
-});
-
-it('should extend a note when dragging the resize handle to the right', () => {
-  component.steps = [1, 2, 3, 4, 5, 6];
-
-  component.grid = component.notes.map(() =>
-    Array(component.steps.length).fill(false)
-  );
-
-  component.noteDurations = component.notes.map(() =>
-    Array(component.steps.length).fill(0)
-  );
-
-  component.noteDurations[0][0] = 1;
-  component.grid[0][0] = true;
-
-  const startEvent = new MouseEvent('mousedown', {
-    clientX: 100
-  });
-
-  component.startResize(startEvent, 0, 0);
-
-  const moveEvent = new MouseEvent('mousemove', {
-    clientX: 196
-  });
-
-  component.onMouseMove(moveEvent);
-
-  expect(component.getNoteDuration(0, 0)).toBe(4);
-
-  expect(component.grid[0]).toEqual([
-    true,
-    true,
-    true,
-    true,
-    false,
-    false
-  ]);
-});
-
-it('should shrink a note when dragging the resize handle to the left', () => {
-  component.steps = [1, 2, 3, 4, 5, 6];
-
-  component.grid = component.notes.map(() =>
-    Array(component.steps.length).fill(false)
-  );
-
-  component.noteDurations = component.notes.map(() =>
-    Array(component.steps.length).fill(0)
-  );
-
-  component.noteDurations[0][0] = 4;
-
-  for (let i = 0; i < 4; i++) {
-    component.grid[0][i] = true;
-  }
-
-  const startEvent = new MouseEvent('mousedown', {
-    clientX: 100
-  });
-
-  component.startResize(startEvent, 0, 0);
-
-  const moveEvent = new MouseEvent('mousemove', {
-    clientX: 68
-  });
-
-  component.onMouseMove(moveEvent);
-
-  expect(component.getNoteDuration(0, 0)).toBe(3);
-
-  expect(component.grid[0]).toEqual([
-    true,
-    true,
-    true,
-    false,
-    false,
-    false
-  ]);
-});
-
-it('should not shrink a note below one step', () => {
-  component.steps = [1, 2, 3];
-
-  component.grid = component.notes.map(() =>
-    Array(component.steps.length).fill(false)
-  );
-
-  component.noteDurations = component.notes.map(() =>
-    Array(component.steps.length).fill(0)
-  );
-
-  component.noteDurations[0][0] = 2;
-  component.grid[0][0] = true;
-  component.grid[0][1] = true;
-
-  const startEvent = new MouseEvent('mousedown', {
-    clientX: 100
-  });
-
-  component.startResize(startEvent, 0, 0);
-
-  const moveEvent = new MouseEvent('mousemove', {
-    clientX: 0
-  });
-
-  component.onMouseMove(moveEvent);
-
-  expect(component.getNoteDuration(0, 0)).toBe(1);
-
-  expect(component.grid[0][0]).toBe(true);
-  expect(component.grid[0][1]).toBe(false);
-});
-
-it('should not extend a note beyond the piano roll', () => {
-  component.steps = [1, 2, 3, 4];
-
-  component.grid = component.notes.map(() =>
-    Array(component.steps.length).fill(false)
-  );
-
-  component.noteDurations = component.notes.map(() =>
-    Array(component.steps.length).fill(0)
-  );
-
-  component.noteDurations[0][2] = 1;
-  component.grid[0][2] = true;
-
-  const startEvent = new MouseEvent('mousedown', {
-    clientX: 100
-  });
-
-  component.startResize(startEvent, 0, 2);
-
-  const moveEvent = new MouseEvent('mousemove', {
-    clientX: 500
-  });
-
-  component.onMouseMove(moveEvent);
-
-  expect(component.getNoteDuration(0, 2)).toBe(2);
-
-  expect(component.grid[0]).toEqual([
-    false,
-    false,
-    true,
-    true
-  ]);
-});
-
-it('should stop resizing on mouseup', () => {
-  component.steps = [1, 2, 3];
-
-  component.grid = component.notes.map(() =>
-    Array(component.steps.length).fill(false)
-  );
-
-  component.noteDurations = component.notes.map(() =>
-    Array(component.steps.length).fill(0)
-  );
-
-  component.noteDurations[0][0] = 1;
-  component.grid[0][0] = true;
-
-  component.startResize(
-    new MouseEvent('mousedown', {
-      clientX: 100
-    }),
-    0,
-    0
-  );
-
-  component.onMouseUp();
-
-  component.onMouseMove(
-    new MouseEvent('mousemove', {
-      clientX: 196
-    })
-  );
-
-  expect(component.getNoteDuration(0, 0)).toBe(1);
-});
 });
