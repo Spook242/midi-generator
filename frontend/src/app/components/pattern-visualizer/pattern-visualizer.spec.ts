@@ -17,8 +17,8 @@ describe('PatternVisualizerComponent', () => {
 
     fixture = TestBed.createComponent(PatternVisualizerComponent);
     component = fixture.componentInstance;
-    gridService = fixture.debugElement.injector.get(PatternGridService);
     
+    gridService = fixture.debugElement.injector.get(PatternGridService);
     fixture.detectChanges();
   });
 
@@ -50,35 +50,35 @@ describe('PatternVisualizerComponent', () => {
       const mockEvent = new MouseEvent('mousedown', { clientX: 100 });
       const preventDefaultSpy = vi.spyOn(mockEvent, 'preventDefault');
       
-      component.startResize(mockEvent, 0, 0);
+      component.startResize(mockEvent, 0, 0, 'right');
       
       expect(preventDefaultSpy).toHaveBeenCalled();
-
       expect(component['resizing']).toBe(true);
       expect(component['resizeRow']).toBe(0);
-      expect(component['resizeColumn']).toBe(0);
+      expect(component['resizeOriginalColumn']).toBe(0);
     });
 
     it('should not initiate resize when clicking on an empty cell', () => {
       vi.spyOn(gridService, 'getNoteDuration').mockReturnValue(0);
       
       const mockEvent = new MouseEvent('mousedown');
-      component.startResize(mockEvent, 0, 0);
+  
+      component.startResize(mockEvent, 0, 0, 'right');
       
       expect(component['resizing']).toBe(false);
     });
 
-    it('should update note duration on mousemove if currently resizing', () => {
+    it('should update note bounds on mousemove if currently resizing from right edge', () => {
       vi.spyOn(gridService, 'getNoteDuration').mockReturnValue(2);
-      const setNoteDurationSpy = vi.spyOn(gridService, 'setNoteDuration');
+      const updateNoteBoundsSpy = vi.spyOn(gridService, 'updateNoteBounds');
       
       const startEvent = new MouseEvent('mousedown', { clientX: 100 });
-      component.startResize(startEvent, 0, 0);
+      component.startResize(startEvent, 0, 0, 'right');
       
       const moveEvent = new MouseEvent('mousemove', { clientX: 132 });
       component.onMouseMove(moveEvent);
       
-      expect(setNoteDurationSpy).toHaveBeenCalledWith(0, 0, 3);
+      expect(updateNoteBoundsSpy).toHaveBeenCalledWith(0, 0, 0, 3);
     });
 
     it('should stop resizing on mouseup', () => {
@@ -88,7 +88,8 @@ describe('PatternVisualizerComponent', () => {
       
       expect(component['resizing']).toBe(false);
       expect(component['resizeRow']).toBe(-1);
-      expect(component['resizeColumn']).toBe(-1);
+      expect(component['resizeOriginalColumn']).toBe(-1);
+      expect(component['resizeCurrentColumn']).toBe(-1);
     });
   });
 });
