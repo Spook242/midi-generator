@@ -1,9 +1,11 @@
 import {
   Component,
+  HostListener,
   Input,
   OnChanges,
   SimpleChanges
 } from '@angular/core';
+
 import { PatternPreview } from '../../models/pattern-preview';
 
 @Component({
@@ -73,17 +75,86 @@ export class PatternVisualizerComponent implements OnChanges {
     (_, i) => i + 1
   );
 
-  grid: boolean[][] = this.createEmptyGrid();
+  grid: boolean[][] = this.notes.map(() =>
+    Array(this.steps.length).fill(false)
+  );
 
-  noteDurations: number[][] = this.createEmptyDurations();
+  noteDurations: number[][] = this.notes.map(() =>
+    Array(this.steps.length).fill(0)
+  );
 
-  private manualGrid: boolean[][] = this.createEmptyGrid();
+  /**
+   * Duraciones de las notas creadas manualmente
+   * por el usuario.
+   *
+   * Se mantienen separadas de las notas recibidas
+   * desde el backend para no perderlas cuando cambia
+   * la escala o la tónica.
+   */
+  private manualNoteDurations: number[][] = this.notes.map(() =>
+    Array(this.steps.length).fill(0)
+  );
+
+  // -----------------------------
+  // RESIZE STATE
+  // -----------------------------
+
+  private resizing = false;
+
+  private resizeRow = -1;
+  private resizeColumn = -1;
+
+  private resizeStartX = 0;
+  private resizeInitialDuration = 1;
+
+  /**
+   * Una celda ocupa:
+   * 28px de ancho + 4px de margin-right
+   */
+  private readonly CELL_WIDTH = 32;
+
+  // -----------------------------
+  // GRID
+  // -----------------------------
 
   toggleCell(row: number, column: number): void {
-    this.manualGrid[row][column] = !this.manualGrid[row][column];
-    this.grid[row][column] = !this.grid[row][column];
+
+    const duration = this.getNoteDuration(row, column);
+
+    // Si hay una nota que empieza en esta celda,
+    // la eliminamos.
+    if (duration > 0) {
+
+      this.noteDurations[row][column] = 0;
+      this.manualNoteDurations[row][column] = 0;
+
+      for (
+        let i = 0;
+        i < duration && column + i < this.steps.length;
+        i++
+      ) {
+        this.grid[row][column + i] = false;
+      }
+
+      return;
+    }
+
+    // Si la celda pertenece a una nota sostenida,
+    // no permitimos crear otra nota encima.
+    if (this.getNoteDurationAt(row, column) > 0) {
+      return;
+    }
+
+    // Crear una nota manual de duración 1.
+    this.noteDurations[row][column] = 1;
+    this.manualNoteDurations[row][column] = 1;
+    this.grid[row][column] = true;
   }
 
+  /**
+   * Devuelve la duración de una nota que comienza
+   * exactamente en la posición indicada.
+   */
   getNoteDuration(row: number, column: number): number {
     return this.noteDurations[row]?.[column] ?? 0;
   }
@@ -92,10 +163,134 @@ export class PatternVisualizerComponent implements OnChanges {
     return this.getNoteDuration(row, column) > 0;
   }
 
+  // -----------------------------
+  // RESIZE
+  // -----------------------------
+
+  startResize(
+    event: MouseEvent,
+    row: number,
+    column: number
+  ): void {
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const duration = this.getNoteDuration(row, column);
+
+    if (duration <= 0) {
+      return;
+    }
+
+    this.resizing = true;
+
+    this.resizeRow = row;
+    this.resizeColumn = column;
+
+    this.resizeStartX = event.clientX;
+    this.resizeInitialDuration = duration;
+  }
+
+  @HostListener('document:mousemove', ['$event'])
+  onMouseMove(event: MouseEvent): void {
+
+    if (!this.resizing) {
+      return;
+    }
+
+    const deltaX =
+      event.clientX - this.resizeStartX;
+
+    const deltaSteps =
+      Math.round(deltaX / this.CELL_WIDTH);
+
+    let newDuration =
+      this.resizeInitialDuration + deltaSteps;
+
+    // Mínimo: 1 paso
+    newDuration = Math.max(1, newDuration);
+
+    // No permitir salirnos del piano roll.
+    const maxDuration =
+      this.steps.length - this.resizeColumn;
+
+    newDuration =
+      Math.min(newDuration, maxDuration);
+
+    this.setNoteDuration(
+      this.resizeRow,
+      this.resizeColumn,
+      newDuration
+    );
+  }
+
+  @HostListener('document:mouseup')
+  onMouseUp(): void {
+
+    this.resizing = false;
+
+    this.resizeRow = -1;
+    this.resizeColumn = -1;
+  }
+
+  private setNoteDuration(
+    row: number,
+    column: number,
+    duration: number
+  ): void {
+
+    // Limpiar la duración anterior.
+    const oldDuration =
+      this.noteDurations[row][column];
+
+    for (
+      let i = 0;
+      i < oldDuration &&
+      column + i < this.steps.length;
+      i++
+    ) {
+      this.grid[row][column + i] = false;
+    }
+
+    // Guardar nueva duración.
+    this.noteDurations[row][column] = duration;
+
+    // Como esta nota está siendo modificada
+    // manualmente, también actualizamos su duración
+    // persistente.
+    this.manualNoteDurations[row][column] = duration;
+
+    // Marcar las nuevas celdas.
+    for (
+      let i = 0;
+      i < duration &&
+      column + i < this.steps.length;
+      i++
+    ) {
+      this.grid[row][column + i] = true;
+    }
+  }
+
+  // -----------------------------
+  // PREVIEW
+  // -----------------------------
+
   private drawPreview(): void {
+
     if (!this.preview) {
       return;
     }
+
+    if (this.preview.notes.length === 0) {
+      return;
+    }
+
+    /*
+     * Guardamos las notas manuales actuales antes
+     * de reconstruir el grid.
+     */
+    const previousManualDurations =
+      this.manualNoteDurations;
 
     const totalSteps = Math.max(
       ...this.preview.notes.map(
@@ -108,26 +303,36 @@ export class PatternVisualizerComponent implements OnChanges {
       (_, i) => i + 1
     );
 
-    const previousManualGrid = this.manualGrid;
+    /*
+     * Reconstruimos el grid.
+     */
+    this.grid = this.notes.map(() =>
+      Array(this.steps.length).fill(false)
+    );
 
-    this.manualGrid = this.createEmptyGrid();
+    this.noteDurations = this.notes.map(() =>
+      Array(this.steps.length).fill(0)
+    );
 
-    for (let row = 0; row < this.notes.length; row++) {
-      for (
-        let column = 0;
-        column < Math.min(
-          previousManualGrid[row]?.length ?? 0,
-          this.steps.length
-        );
-        column++
-      ) {
-        this.manualGrid[row][column] =
-          previousManualGrid[row][column];
-      }
-    }
+    /*
+     * Conservamos las notas manuales.
+     *
+     * Importante:
+     * si el nuevo preview tiene más o menos steps,
+     * adaptamos la matriz al nuevo tamaño.
+     */
+    this.manualNoteDurations = this.notes.map(
+      (_, row) =>
+        Array.from(
+          { length: this.steps.length },
+          (_, column) =>
+            previousManualDurations[row]?.[column] ?? 0
+        )
+    );
 
-    this.grid = this.createEmptyGrid();
-    this.noteDurations = this.createEmptyDurations();
+    // -----------------------------
+    // NOTAS DEL BACKEND
+    // -----------------------------
 
     for (const note of this.preview.notes) {
 
@@ -135,50 +340,84 @@ export class PatternVisualizerComponent implements OnChanges {
       const column = note.startPosition;
 
       if (
-        row >= 0 &&
-        row < this.grid.length &&
-        column >= 0 &&
-        column < this.steps.length
+        row < 0 ||
+        row >= this.grid.length ||
+        column < 0 ||
+        column >= this.steps.length
+      ) {
+        continue;
+      }
+
+      this.noteDurations[row][column] =
+        note.duration;
+
+      for (
+        let i = 0;
+        i < note.duration;
+        i++
       ) {
 
-        this.noteDurations[row][column] = note.duration;
+        const currentColumn =
+          column + i;
 
-        for (let i = 0; i < note.duration; i++) {
+        if (
+          currentColumn >= 0 &&
+          currentColumn < this.steps.length
+        ) {
+          this.grid[row][currentColumn] = true;
+        }
+      }
+    }
 
-          const currentColumn = column + i;
+    // -----------------------------
+    // NOTAS MANUALES
+    // -----------------------------
 
-          if (currentColumn < this.steps.length) {
+    for (
+      let row = 0;
+      row < this.notes.length;
+      row++
+    ) {
+
+      for (
+        let column = 0;
+        column < this.steps.length;
+        column++
+      ) {
+
+        const duration =
+          this.manualNoteDurations[row][column];
+
+        if (duration <= 0) {
+          continue;
+        }
+
+        this.noteDurations[row][column] =
+          duration;
+
+        for (
+          let i = 0;
+          i < duration;
+          i++
+        ) {
+
+          const currentColumn =
+            column + i;
+
+          if (
+            currentColumn >= 0 &&
+            currentColumn < this.steps.length
+          ) {
             this.grid[row][currentColumn] = true;
           }
         }
       }
     }
-
-    this.mergeManualNotes();
   }
 
-  private mergeManualNotes(): void {
-    for (let row = 0; row < this.notes.length; row++) {
-      for (let column = 0; column < this.steps.length; column++) {
-
-        if (this.manualGrid[row][column]) {
-          this.grid[row][column] = true;
-        }
-      }
-    }
-  }
-
-  private createEmptyGrid(): boolean[][] {
-    return this.notes.map(() =>
-      Array(this.steps.length).fill(false)
-    );
-  }
-
-  private createEmptyDurations(): number[][] {
-    return this.notes.map(() =>
-      Array(this.steps.length).fill(0)
-    );
-  }
+  // -----------------------------
+  // MIDI PITCH → ROW
+  // -----------------------------
 
   private pitchToRow(pitch: number): number {
 
@@ -237,27 +476,49 @@ export class PatternVisualizerComponent implements OnChanges {
     return midiNotes.indexOf(pitch);
   }
 
+  // -----------------------------
+  // ANGULAR CHANGES
+  // -----------------------------
+
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['preview'] && this.preview) {
+
+    if (
+      changes['preview'] &&
+      this.preview
+    ) {
       this.drawPreview();
     }
   }
 
-  getNoteDurationAt(row: number, column: number): number {
+  // -----------------------------
+  // SUSTAINED NOTE
+  // -----------------------------
 
-    const duration = this.getNoteDuration(row, column);
+  getNoteDurationAt(
+    row: number,
+    column: number
+  ): number {
+
+    const duration =
+      this.getNoteDuration(row, column);
 
     if (duration > 0) {
       return duration;
     }
 
-    for (let start = column - 1; start >= 0; start--) {
+    for (
+      let start = column - 1;
+      start >= 0;
+      start--
+    ) {
 
-      const noteDuration = this.getNoteDuration(row, start);
+      const noteDuration =
+        this.getNoteDuration(row, start);
 
       if (noteDuration > 0) {
 
-        const distance = column - start;
+        const distance =
+          column - start;
 
         return distance < noteDuration
           ? noteDuration - distance
