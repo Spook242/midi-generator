@@ -26,6 +26,13 @@
               class="cell note"
               [style.--note-duration]="getNoteDuration(row, column)"
               (click)="toggleCell(row, column)">
+
+              <span
+                class="resize-handle"
+                (mousedown)="startResize($event, row, column)"
+                (click)="$event.stopPropagation()">
+              </span>
+
             </div>
 
           } @else if (getNoteDurationAt(row, column) === 0) {
@@ -36,7 +43,7 @@
               (click)="toggleCell(row, column)">
             </div>
 
-          }
+}
 
         }
       </div>

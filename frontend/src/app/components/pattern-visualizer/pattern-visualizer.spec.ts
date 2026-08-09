@@ -245,4 +245,184 @@ describe('PatternVisualizerComponent', () => {
   expect(component.grid[12][1]).toBe(true);
 });
 
+it('should extend a note when dragging the resize handle to the right', () => {
+  component.steps = [1, 2, 3, 4, 5, 6];
+
+  component.grid = component.notes.map(() =>
+    Array(component.steps.length).fill(false)
+  );
+
+  component.noteDurations = component.notes.map(() =>
+    Array(component.steps.length).fill(0)
+  );
+
+  component.noteDurations[0][0] = 1;
+  component.grid[0][0] = true;
+
+  const startEvent = new MouseEvent('mousedown', {
+    clientX: 100
+  });
+
+  component.startResize(startEvent, 0, 0);
+
+  const moveEvent = new MouseEvent('mousemove', {
+    clientX: 196
+  });
+
+  component.onMouseMove(moveEvent);
+
+  expect(component.getNoteDuration(0, 0)).toBe(4);
+
+  expect(component.grid[0]).toEqual([
+    true,
+    true,
+    true,
+    true,
+    false,
+    false
+  ]);
+});
+
+it('should shrink a note when dragging the resize handle to the left', () => {
+  component.steps = [1, 2, 3, 4, 5, 6];
+
+  component.grid = component.notes.map(() =>
+    Array(component.steps.length).fill(false)
+  );
+
+  component.noteDurations = component.notes.map(() =>
+    Array(component.steps.length).fill(0)
+  );
+
+  component.noteDurations[0][0] = 4;
+
+  for (let i = 0; i < 4; i++) {
+    component.grid[0][i] = true;
+  }
+
+  const startEvent = new MouseEvent('mousedown', {
+    clientX: 100
+  });
+
+  component.startResize(startEvent, 0, 0);
+
+  const moveEvent = new MouseEvent('mousemove', {
+    clientX: 68
+  });
+
+  component.onMouseMove(moveEvent);
+
+  expect(component.getNoteDuration(0, 0)).toBe(3);
+
+  expect(component.grid[0]).toEqual([
+    true,
+    true,
+    true,
+    false,
+    false,
+    false
+  ]);
+});
+
+it('should not shrink a note below one step', () => {
+  component.steps = [1, 2, 3];
+
+  component.grid = component.notes.map(() =>
+    Array(component.steps.length).fill(false)
+  );
+
+  component.noteDurations = component.notes.map(() =>
+    Array(component.steps.length).fill(0)
+  );
+
+  component.noteDurations[0][0] = 2;
+  component.grid[0][0] = true;
+  component.grid[0][1] = true;
+
+  const startEvent = new MouseEvent('mousedown', {
+    clientX: 100
+  });
+
+  component.startResize(startEvent, 0, 0);
+
+  const moveEvent = new MouseEvent('mousemove', {
+    clientX: 0
+  });
+
+  component.onMouseMove(moveEvent);
+
+  expect(component.getNoteDuration(0, 0)).toBe(1);
+
+  expect(component.grid[0][0]).toBe(true);
+  expect(component.grid[0][1]).toBe(false);
+});
+
+it('should not extend a note beyond the piano roll', () => {
+  component.steps = [1, 2, 3, 4];
+
+  component.grid = component.notes.map(() =>
+    Array(component.steps.length).fill(false)
+  );
+
+  component.noteDurations = component.notes.map(() =>
+    Array(component.steps.length).fill(0)
+  );
+
+  component.noteDurations[0][2] = 1;
+  component.grid[0][2] = true;
+
+  const startEvent = new MouseEvent('mousedown', {
+    clientX: 100
+  });
+
+  component.startResize(startEvent, 0, 2);
+
+  const moveEvent = new MouseEvent('mousemove', {
+    clientX: 500
+  });
+
+  component.onMouseMove(moveEvent);
+
+  expect(component.getNoteDuration(0, 2)).toBe(2);
+
+  expect(component.grid[0]).toEqual([
+    false,
+    false,
+    true,
+    true
+  ]);
+});
+
+it('should stop resizing on mouseup', () => {
+  component.steps = [1, 2, 3];
+
+  component.grid = component.notes.map(() =>
+    Array(component.steps.length).fill(false)
+  );
+
+  component.noteDurations = component.notes.map(() =>
+    Array(component.steps.length).fill(0)
+  );
+
+  component.noteDurations[0][0] = 1;
+  component.grid[0][0] = true;
+
+  component.startResize(
+    new MouseEvent('mousedown', {
+      clientX: 100
+    }),
+    0,
+    0
+  );
+
+  component.onMouseUp();
+
+  component.onMouseMove(
+    new MouseEvent('mousemove', {
+      clientX: 196
+    })
+  );
+
+  expect(component.getNoteDuration(0, 0)).toBe(1);
+});
 });

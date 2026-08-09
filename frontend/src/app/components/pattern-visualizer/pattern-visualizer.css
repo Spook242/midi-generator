@@ -94,10 +94,28 @@
 }
 
 .cell.note {
+  position: relative;
+
   width: calc(
     var(--note-duration) * 28px +
     (var(--note-duration) - 1) * 4px
   );
 
   background: #0066ff;
+}
+
+.resize-handle {
+  position: absolute;
+  top: 0;
+  right: 0;
+
+  width: 8px;
+  height: 100%;
+
+  cursor: ew-resize;
+  z-index: 10;
+}
+
+.resize-handle:hover {
+  background: rgba(255, 255, 255, 0.25);
 }
