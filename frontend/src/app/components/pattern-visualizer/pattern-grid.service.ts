@@ -44,28 +44,6 @@ export class PatternGridService {
     return this.getNoteDuration(row, column) > 0;
   }
 
-  updateNoteBounds(row: number, oldColumn: number, newColumn: number, newDuration: number): void {
-    if (oldColumn === newColumn && this.getNoteDuration(row, oldColumn) === newDuration) {
-      return;
-    }
-
-    const oldDuration = this.noteDurations[row][oldColumn];
-    if (oldDuration > 0) {
-      for (let i = 0; i < oldDuration && oldColumn + i < this.steps.length; i++) {
-        this.grid[row][oldColumn + i] = false;
-      }
-      this.noteDurations[row][oldColumn] = 0;
-      this.manualNoteDurations[row][oldColumn] = 0;
-    }
-
-      this.noteDurations[row][newColumn] = newDuration;
-      this.manualNoteDurations[row][newColumn] = newDuration;
-
-    for (let i = 0; i < newDuration && newColumn + i < this.steps.length; i++) {
-      this.grid[row][newColumn + i] = true;
-    }
-  }
-
   getNoteDurationAt(row: number, column: number): number {
     const duration = this.getNoteDuration(row, column);
 
@@ -83,6 +61,50 @@ export class PatternGridService {
     }
 
     return 0;
+  }
+
+  updateNoteBounds(row: number, oldColumn: number, newColumn: number, newDuration: number): void {
+    if (oldColumn === newColumn && this.getNoteDuration(row, oldColumn) === newDuration) {
+      return;
+    }
+
+    const oldDuration = this.noteDurations[row][oldColumn];
+
+    if (oldDuration > 0) {
+      for (let i = 0; i < oldDuration && oldColumn + i < this.steps.length; i++) {
+        this.grid[row][oldColumn + i] = false;
+      }
+      this.noteDurations[row][oldColumn] = 0;
+      this.manualNoteDurations[row][oldColumn] = 0;
+    }
+
+    this.noteDurations[row][newColumn] = newDuration;
+    this.manualNoteDurations[row][newColumn] = newDuration;
+
+    for (let i = 0; i < newDuration && newColumn + i < this.steps.length; i++) {
+      this.grid[row][newColumn + i] = true;
+    }
+  }
+
+  moveNote(oldRow: number, oldCol: number, newRow: number, newCol: number, duration: number): void {
+    if (oldRow === newRow && oldCol === newCol) {
+      return;
+    }
+
+    if (this.noteDurations[oldRow][oldCol] > 0) {
+      for (let i = 0; i < duration && oldCol + i < this.steps.length; i++) {
+        this.grid[oldRow][oldCol + i] = false;
+      }
+      this.noteDurations[oldRow][oldCol] = 0;
+      this.manualNoteDurations[oldRow][oldCol] = 0;
+    }
+
+    this.noteDurations[newRow][newCol] = duration;
+    this.manualNoteDurations[newRow][newCol] = duration;
+
+    for (let i = 0; i < duration && newCol + i < this.steps.length; i++) {
+      this.grid[newRow][newCol + i] = true;
+    }
   }
 
   drawPreview(preview: PatternPreview | null): void {
