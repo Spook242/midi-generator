@@ -74,6 +74,54 @@ describe('PatternVisualizerComponent', () => {
       expect(component['dragHasMoved']).toBe(false);
     });
 
+    describe('Header Controls (Play, Stop, BPM)', () => {
+    it('should emit play event when onPlayClick is called', () => {
+      const playSpy = vi.spyOn(component.play, 'emit');
+      
+      component.onPlayClick();
+      
+      expect(playSpy).toHaveBeenCalledOnce();
+    });
+
+    it('should emit stop event when onStopClick is called', () => {
+      const stopSpy = vi.spyOn(component.stop, 'emit');
+      
+      component.onStopClick();
+      
+      expect(stopSpy).toHaveBeenCalledOnce();
+    });
+
+    it('should emit bpmChange with the new value if within valid range (60 - 200)', () => {
+      const bpmSpy = vi.spyOn(component.bpmChange, 'emit');
+      
+      component.bpm = 120;
+      component.onTempoChange(1);
+      
+      expect(bpmSpy).toHaveBeenCalledWith(121);
+      
+      component.onTempoChange(-10);
+      expect(bpmSpy).toHaveBeenCalledWith(110);
+    });
+
+    it('should NOT emit bpmChange if the new tempo drops below 60', () => {
+      const bpmSpy = vi.spyOn(component.bpmChange, 'emit');
+      
+      component.bpm = 60;
+      component.onTempoChange(-1);
+      
+      expect(bpmSpy).not.toHaveBeenCalled();
+    });
+
+    it('should NOT emit bpmChange if the new tempo exceeds 200', () => {
+      const bpmSpy = vi.spyOn(component.bpmChange, 'emit');
+      
+      component.bpm = 200;
+      component.onTempoChange(1);
+      
+      expect(bpmSpy).not.toHaveBeenCalled();
+    });
+  });
+
     it('should move the note if dragged beyond the deadzone threshold', () => {
       vi.spyOn(gridService, 'getNoteDuration').mockReturnValue(2);
       const moveNoteSpy = vi.spyOn(gridService, 'moveNote');
