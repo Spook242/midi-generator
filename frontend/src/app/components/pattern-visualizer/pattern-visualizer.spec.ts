@@ -58,6 +58,67 @@ describe('PatternVisualizerComponent', () => {
       expect(component['resizeOriginalColumn']).toBe(0);
     });
 
+    describe('Mouse Events (Drag & Drop)', () => {
+    it('should register drag start on mousedown over a note body', () => {
+      vi.spyOn(gridService, 'getNoteDuration').mockReturnValue(2);
+      
+      const mockEvent = new MouseEvent('mousedown', { clientX: 100, clientY: 200 });
+      const preventDefaultSpy = vi.spyOn(mockEvent, 'preventDefault');
+      
+      component.startDrag(mockEvent, 10, 5);
+      
+      expect(preventDefaultSpy).toHaveBeenCalled();
+      expect(component['dragging']).toBe(true);
+      expect(component['dragStartRow']).toBe(10);
+      expect(component['dragStartColumn']).toBe(5);
+      expect(component['dragHasMoved']).toBe(false);
+    });
+
+    it('should move the note if dragged beyond the deadzone threshold', () => {
+      vi.spyOn(gridService, 'getNoteDuration').mockReturnValue(2);
+      const moveNoteSpy = vi.spyOn(gridService, 'moveNote');
+      
+      const startEvent = new MouseEvent('mousedown', { clientX: 100, clientY: 100 });
+      component.startDrag(startEvent, 10, 5);
+      
+      const moveEvent = new MouseEvent('mousemove', { clientX: 132, clientY: 132 });
+      component.onMouseMove(moveEvent);
+      
+      expect(component['dragHasMoved']).toBe(true);
+      expect(moveNoteSpy).toHaveBeenCalledWith(10, 5, 11, 6, 2);
+    });
+
+    it('should toggle (delete) the cell on mouseup if the mouse did not move', () => {
+      vi.spyOn(gridService, 'getNoteDuration').mockReturnValue(2);
+      const toggleCellSpy = vi.spyOn(gridService, 'toggleCell');
+      
+      const startEvent = new MouseEvent('mousedown', { clientX: 100, clientY: 100 });
+      component.startDrag(startEvent, 10, 5);
+      
+      component.onMouseUp();
+      
+      expect(component['dragHasMoved']).toBe(false);
+      expect(toggleCellSpy).toHaveBeenCalledWith(10, 5);
+      expect(component['dragging']).toBe(false);
+    });
+
+    it('should NOT toggle the cell on mouseup if a drag occurred', () => {
+      vi.spyOn(gridService, 'getNoteDuration').mockReturnValue(2);
+      const toggleCellSpy = vi.spyOn(gridService, 'toggleCell');
+      
+      const startEvent = new MouseEvent('mousedown', { clientX: 100, clientY: 100 });
+      component.startDrag(startEvent, 10, 5);
+      
+      const moveEvent = new MouseEvent('mousemove', { clientX: 132, clientY: 100 });
+      component.onMouseMove(moveEvent);
+      
+      component.onMouseUp();
+      
+      expect(toggleCellSpy).not.toHaveBeenCalled();
+      expect(component['dragging']).toBe(false);
+    });
+  });
+
     it('should not initiate resize when clicking on an empty cell', () => {
       vi.spyOn(gridService, 'getNoteDuration').mockReturnValue(0);
       

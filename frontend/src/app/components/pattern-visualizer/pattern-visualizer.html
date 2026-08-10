@@ -25,7 +25,7 @@
             <div
               class="cell note"
               [style.--note-duration]="gridService.getNoteDuration(row, column)"
-              (click)="gridService.toggleCell(row, column)">
+              (mousedown)="startDrag($event, row, column)">
 
               <span
                 class="resize-handle left"

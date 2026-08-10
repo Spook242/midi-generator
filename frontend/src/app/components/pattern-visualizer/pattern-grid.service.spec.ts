@@ -42,8 +42,8 @@ describe('PatternGridService', () => {
 
   describe('updateNoteBounds()', () => {
     it('should update the duration without moving the start column (right drag)', () => {
-      service.toggleCell(24, 0); // Fila 24, Columna 0
-      service.updateNoteBounds(24, 0, 0, 4); // oldCol: 0, newCol: 0, duration: 4
+      service.toggleCell(24, 0);
+      service.updateNoteBounds(24, 0, 0, 4);
       
       expect(service.noteDurations[24][0]).toBe(4);
       expect(service.grid[24][0]).toBe(true);
@@ -53,12 +53,37 @@ describe('PatternGridService', () => {
       expect(service.grid[24][4]).toBe(false);
     });
 
-    it('should move the note to a new column and update duration (left drag)', () => {
-      service.toggleCell(24, 2); // Initial note at col 2
-      service.updateNoteBounds(24, 2, 0, 4); // moved to col 0, duration 4
+    describe('moveNote()', () => {
+    it('should move the note to a completely new row and column', () => {
+      service.toggleCell(24, 0); 
+      service.updateNoteBounds(24, 0, 0, 2);
+      service.moveNote(24, 0, 25, 4, 2);
 
-      expect(service.noteDurations[24][2]).toBe(0); // Old note start removed
-      expect(service.noteDurations[24][0]).toBe(4); // New note start saved
+    
+      expect(service.noteDurations[24][0]).toBe(0);
+      expect(service.grid[24][0]).toBe(false);
+      expect(service.grid[24][1]).toBe(false);
+
+      expect(service.noteDurations[25][4]).toBe(2);
+      expect(service.grid[25][4]).toBe(true);
+      expect(service.grid[25][5]).toBe(true);
+    });
+
+    it('should do nothing if the start and end coordinates are the same', () => {
+      service.toggleCell(24, 0);
+      service.moveNote(24, 0, 24, 0, 1);
+      
+      expect(service.noteDurations[24][0]).toBe(1);
+      expect(service.grid[24][0]).toBe(true);
+    });
+  });
+
+    it('should move the note to a new column and update duration (left drag)', () => {
+      service.toggleCell(24, 2);
+      service.updateNoteBounds(24, 2, 0, 4);
+
+      expect(service.noteDurations[24][2]).toBe(0);
+      expect(service.noteDurations[24][0]).toBe(4);
       
       expect(service.grid[24][0]).toBe(true);
       expect(service.grid[24][1]).toBe(true);
