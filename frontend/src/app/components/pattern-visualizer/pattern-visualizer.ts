@@ -2,6 +2,8 @@ import {
   Component,
   HostListener,
   Input,
+  Output,
+  EventEmitter,
   OnChanges,
   SimpleChanges
 } from '@angular/core';
@@ -19,6 +21,12 @@ import { PIANO_ROLL_NOTES } from './pattern-mapping.util';
 })
 export class PatternVisualizerComponent implements OnChanges {
   @Input() preview: PatternPreview | null = null;
+  @Input() bpm: number = 120;
+
+  @Output() play = new EventEmitter<void>();
+  @Output() stop = new EventEmitter<void>();
+  @Output() bpmChange = new EventEmitter<number>();
+
   readonly notes = PIANO_ROLL_NOTES;
 
   private readonly CELL_WIDTH = 32;
@@ -173,6 +181,21 @@ export class PatternVisualizerComponent implements OnChanges {
       );
       this.dragCurrentRow = newRow;
       this.dragCurrentColumn = newColumn;
+    }
+  }
+
+  onPlayClick(): void {
+    this.play.emit();
+  }
+
+  onStopClick(): void {
+    this.stop.emit();
+  }
+
+  onTempoChange(delta: number): void {
+    const newBpm = this.bpm + delta;
+    if (newBpm >= 60 && newBpm <= 200) {
+      this.bpmChange.emit(newBpm);
     }
   }
 }
