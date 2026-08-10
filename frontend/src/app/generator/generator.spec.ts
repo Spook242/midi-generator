@@ -46,6 +46,7 @@ describe('GeneratorComponent', () => {
     expect(form.get('scale')?.value).toBe('Phrygian');
     expect(form.get('key')?.value).toBe('C');
     expect(form.get('bpm')?.value).toBe(120);
+    expect(form.get('pattern')?.value).toBe('Industrial Bassline');
   });
 
   it('should render the exact number of scale options dynamically in the DOM', () => {
@@ -64,5 +65,14 @@ describe('GeneratorComponent', () => {
     expect(options.length).toBe(component.availableKeys.length);
     expect(options[1].nativeElement.textContent.trim()).toBe('C#');
     expect(options[1].nativeElement.value).toBe('C#');
+  });
+
+  it('should render the exact number of pattern options dynamically in the DOM', () => {
+    const patternSelect = fixture.debugElement.query(By.css('#pattern'));
+    const options = patternSelect.queryAll(By.css('option'));
+
+    expect(options.length).toBe(component.patternTypes.length);
+    expect(options[0].nativeElement.textContent.trim()).toBe('Industrial Bassline');
+    expect(options[0].nativeElement.value).toBe('Industrial Bassline');
   });
 });

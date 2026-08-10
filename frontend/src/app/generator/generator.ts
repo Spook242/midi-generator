@@ -37,6 +37,13 @@ export class GeneratorComponent implements OnInit {
   readonly availableScales = AVAILABLE_SCALES;
   readonly availableKeys = AVAILABLE_KEYS;
 
+  readonly patternTypes = [
+    'Industrial Bassline',
+    'EBM Sequence',
+    'Dark Techno Arp',
+    'Atmospheric Pad'
+  ];
+
   constructor(
     private fb: FormBuilder,
     private midiService: MidiGeneratorService,
@@ -53,7 +60,8 @@ export class GeneratorComponent implements OnInit {
         [Validators.required, Validators.min(1), Validators.max(16)]
       ],
       scale: ['Phrygian', Validators.required],
-      key: ['C', Validators.required]
+      key: ['C', Validators.required],
+      pattern: ['Industrial Bassline', Validators.required]
     });
   }
 
