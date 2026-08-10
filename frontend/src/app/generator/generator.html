@@ -109,6 +109,18 @@
 
         </div>
 
+        <div class="form-group">
+          <label for="patternSelect">Pattern</label>
+          <select 
+            id="patternSelect" 
+            formControlName="pattern" 
+            class="dark-input">
+            @for (type of patternTypes; track type) {
+              <option [value]="type">{{ type }}</option>
+            }
+          </select>
+        </div>
+
         <div class="spacer"></div>
 
         <button
@@ -125,19 +137,14 @@
     </aside>
 
     <section class="panel center-panel">
-
-    <app-pattern-visualizer [preview]="preview"></app-pattern-visualizer>
-
+      <app-pattern-visualizer [preview]="preview"></app-pattern-visualizer>
     </section>
 
     <aside class="panel right-panel">
-
       <h2>MY LIBRARY</h2>
-
       <p class="placeholder-text">
         La lista de canciones irá aquí...
       </p>
-
     </aside>
 
   </main>
