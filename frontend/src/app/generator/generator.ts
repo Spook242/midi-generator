@@ -18,14 +18,17 @@ import { PatternVisualizerComponent } from '../components/pattern-visualizer/pat
 import { PatternPreview } from '../models/pattern-preview';
 import { AVAILABLE_SCALES, AVAILABLE_KEYS } from '../shared/constants/music-theory.constants';
 import { downloadMidiFile } from '../shared/utils/file-download.util';
+import { LibraryComponent } from '../components/library/library';
 
 @Component({
   selector: 'app-generator',
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    PatternVisualizerComponent
+    PatternVisualizerComponent,
+    LibraryComponent
   ],
+  
   templateUrl: './generator.html',
   styleUrls: ['./generator.css']
 })

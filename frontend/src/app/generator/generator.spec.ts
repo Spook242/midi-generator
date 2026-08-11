@@ -68,7 +68,7 @@ describe('GeneratorComponent', () => {
   });
 
   it('should render the exact number of pattern options dynamically in the DOM', () => {
-    const patternSelect = fixture.debugElement.query(By.css('#pattern'));
+    const patternSelect = fixture.debugElement.query(By.css('#patternSelect'));
     const options = patternSelect.queryAll(By.css('option'));
 
     expect(options.length).toBe(component.patternTypes.length);
