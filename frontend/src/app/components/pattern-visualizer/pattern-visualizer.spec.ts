@@ -4,17 +4,28 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { PatternVisualizerComponent } from './pattern-visualizer';
 import { PatternGridService } from './pattern-grid.service';
 import { PatternPreview } from '../../models/pattern-preview';
+import { AudioPreview } from '../../services/audio-preview';
+import { PIANO_ROLL_NOTES } from './pattern-mapping.util';
 
 describe('PatternVisualizerComponent', () => {
   let component: PatternVisualizerComponent;
   let fixture: ComponentFixture<PatternVisualizerComponent>;
   let gridService: PatternGridService;
+  let audioPreview: Pick<AudioPreview, 'playNote'>;
 
   beforeEach(async () => {
+    audioPreview = {
+  playNote: vi.fn().mockResolvedValue(undefined)
+};
     await TestBed.configureTestingModule({
-      imports: [PatternVisualizerComponent],
-    }).compileComponents();
-
+  imports: [PatternVisualizerComponent],
+  providers: [
+    {
+      provide: AudioPreview,
+      useValue: audioPreview
+    }
+  ]
+}).compileComponents();
     fixture = TestBed.createComponent(PatternVisualizerComponent);
     component = fixture.componentInstance;
     
@@ -43,6 +54,22 @@ describe('PatternVisualizerComponent', () => {
     });
   });
 
+  describe('Piano-roll note preview', () => {
+  it('should create and preview a note when an empty cell is pressed', () => {
+    vi.spyOn(gridService, 'getNoteDuration').mockReturnValue(0);
+    const toggleCellSpy = vi.spyOn(gridService, 'toggleCell');
+
+    const event = new MouseEvent('mousedown');
+    const preventDefaultSpy = vi.spyOn(event, 'preventDefault');
+
+    component.onCellMouseDown(event, 0, 4);
+
+    expect(preventDefaultSpy).toHaveBeenCalled();
+    expect(toggleCellSpy).toHaveBeenCalledWith(0, 4);
+    expect(audioPreview.playNote)
+      .toHaveBeenCalledWith(PIANO_ROLL_NOTES[0]);
+  });
+
   describe('Mouse Events (Resizing)', () => {
     it('should initiate resize when clicking on a valid note start', () => {
       vi.spyOn(gridService, 'getNoteDuration').mockReturnValue(2);
@@ -59,20 +86,26 @@ describe('PatternVisualizerComponent', () => {
     });
 
     describe('Mouse Events (Drag & Drop)', () => {
+
     it('should register drag start on mousedown over a note body', () => {
-      vi.spyOn(gridService, 'getNoteDuration').mockReturnValue(2);
-      
-      const mockEvent = new MouseEvent('mousedown', { clientX: 100, clientY: 200 });
-      const preventDefaultSpy = vi.spyOn(mockEvent, 'preventDefault');
-      
-      component.startDrag(mockEvent, 10, 5);
-      
-      expect(preventDefaultSpy).toHaveBeenCalled();
-      expect(component['dragging']).toBe(true);
-      expect(component['dragStartRow']).toBe(10);
-      expect(component['dragStartColumn']).toBe(5);
-      expect(component['dragHasMoved']).toBe(false);
-    });
+  vi.spyOn(gridService, 'getNoteDuration').mockReturnValue(2);
+
+  const mockEvent = new MouseEvent('mousedown', {
+    clientX: 100,
+    clientY: 200
+  });
+
+  const preventDefaultSpy = vi.spyOn(mockEvent, 'preventDefault');
+
+  component.startDrag(mockEvent, 10, 5);
+
+  expect(preventDefaultSpy).toHaveBeenCalled();
+  expect(component['dragging']).toBe(true);
+  expect(component['dragStartRow']).toBe(10);
+  expect(component['dragStartColumn']).toBe(5);
+  expect(component['dragHasMoved']).toBe(false);
+  expect(audioPreview.playNote).not.toHaveBeenCalled();
+});
 
     describe('Header Controls (Play, Stop, BPM)', () => {
     it('should emit play event when onPlayClick is called', () => {
@@ -201,4 +234,5 @@ describe('PatternVisualizerComponent', () => {
       expect(component['resizeCurrentColumn']).toBe(-1);
     });
   });
+});
 });
