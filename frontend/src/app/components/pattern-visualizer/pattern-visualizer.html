@@ -82,7 +82,7 @@
             <div
               class="cell"
               [class.active]="gridService.grid[row][column]"
-              (click)="gridService.toggleCell(row, column)">
+              (mousedown)="onCellMouseDown($event, row, column)">
             </div>
 
           }
