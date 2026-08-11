@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 
 import { PatternPreview } from '../../models/pattern-preview';
+import { AudioPreview } from '../../services/audio-preview';
 import { PatternGridService } from './pattern-grid.service';
 import { PIANO_ROLL_NOTES } from './pattern-mapping.util';
 
@@ -21,7 +22,7 @@ import { PIANO_ROLL_NOTES } from './pattern-mapping.util';
 })
 export class PatternVisualizerComponent implements OnChanges {
   @Input() preview: PatternPreview | null = null;
-  @Input() bpm: number = 120;
+  @Input() bpm = 120;
 
   @Output() play = new EventEmitter<void>();
   @Output() stop = new EventEmitter<void>();
@@ -29,8 +30,8 @@ export class PatternVisualizerComponent implements OnChanges {
 
   readonly notes = PIANO_ROLL_NOTES;
 
-  private readonly CELL_WIDTH = 32;
-  private readonly ROW_HEIGHT = 32; 
+  private readonly cellWidth = 32;
+  private readonly rowHeight = 32;
 
   private resizing = false;
   private resizeRow = -1;
@@ -50,7 +51,10 @@ export class PatternVisualizerComponent implements OnChanges {
   private dragStartY = 0;
   private dragDuration = 1;
 
-  constructor(public gridService: PatternGridService) {}
+  constructor(
+    public readonly gridService: PatternGridService,
+    private readonly audioPreview: AudioPreview
+  ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['preview'] && this.preview) {
@@ -58,12 +62,31 @@ export class PatternVisualizerComponent implements OnChanges {
     }
   }
 
-  startResize(event: MouseEvent, row: number, column: number, edge: 'left' | 'right'): void {
+  onCellMouseDown(event: MouseEvent, row: number, column: number): void {
+  event.preventDefault();
+
+  this.gridService.toggleCell(row, column);
+
+  const note = this.notes[row];
+
+  if (note) {
+    void this.audioPreview.playNote(note);
+  }
+}
+
+  startResize(
+    event: MouseEvent,
+    row: number,
+    column: number,
+    edge: 'left' | 'right'
+  ): void {
     event.preventDefault();
     event.stopPropagation();
 
     const duration = this.gridService.getNoteDuration(row, column);
-    if (duration <= 0) return;
+    if (duration <= 0) {
+      return;
+    }
 
     this.resizing = true;
     this.resizeRow = row;
@@ -78,7 +101,9 @@ export class PatternVisualizerComponent implements OnChanges {
     event.preventDefault();
 
     const duration = this.gridService.getNoteDuration(row, column);
-    if (duration <= 0) return;
+    if (duration <= 0) {
+      return;
+    }
 
     this.dragging = true;
     this.dragHasMoved = false;
@@ -107,78 +132,112 @@ export class PatternVisualizerComponent implements OnChanges {
   onMouseUp(): void {
     if (this.resizing) {
       this.resizing = false;
+      return;
     }
 
     if (this.dragging) {
+      // Clic sobre una nota existente sin arrastrarla: eliminarla.
       if (!this.dragHasMoved) {
-        this.gridService.toggleCell(this.dragStartRow, this.dragStartColumn);
+        this.gridService.toggleCell(
+          this.dragStartRow,
+          this.dragStartColumn
+        );
       }
+
       this.dragging = false;
     }
   }
 
   private handleResizeMove(event: MouseEvent): void {
     const deltaX = event.clientX - this.resizeStartX;
-    const deltaSteps = Math.round(deltaX / this.CELL_WIDTH);
+    const deltaSteps = Math.round(deltaX / this.cellWidth);
 
     if (this.resizeEdge === 'right') {
       let newDuration = this.resizeInitialDuration + deltaSteps;
       newDuration = Math.max(1, newDuration);
-      const maxDuration = this.gridService.steps.length - this.resizeOriginalColumn;
+
+      const maxDuration =
+        this.gridService.steps.length - this.resizeOriginalColumn;
+
       newDuration = Math.min(newDuration, maxDuration);
 
       this.gridService.updateNoteBounds(
-        this.resizeRow, this.resizeCurrentColumn, this.resizeOriginalColumn, newDuration
+        this.resizeRow,
+        this.resizeCurrentColumn,
+        this.resizeOriginalColumn,
+        newDuration
       );
+
       this.resizeCurrentColumn = this.resizeOriginalColumn;
-
-    } else {
-      let newColumn = this.resizeOriginalColumn + deltaSteps;
-      let newDuration = this.resizeInitialDuration - deltaSteps;
-
-      if (newColumn < 0) {
-        newColumn = 0;
-        newDuration = this.resizeInitialDuration + this.resizeOriginalColumn;
-      }
-
-      if (newDuration < 1) {
-        newDuration = 1;
-        newColumn = this.resizeOriginalColumn + this.resizeInitialDuration - 1;
-      }
-
-      this.gridService.updateNoteBounds(
-        this.resizeRow, this.resizeCurrentColumn, newColumn, newDuration
-      );
-      this.resizeCurrentColumn = newColumn;
+      return;
     }
+
+    let newColumn = this.resizeOriginalColumn + deltaSteps;
+    let newDuration = this.resizeInitialDuration - deltaSteps;
+
+    if (newColumn < 0) {
+      newColumn = 0;
+      newDuration = this.resizeInitialDuration + this.resizeOriginalColumn;
+    }
+
+    if (newDuration < 1) {
+      newDuration = 1;
+      newColumn =
+        this.resizeOriginalColumn + this.resizeInitialDuration - 1;
+    }
+
+    this.gridService.updateNoteBounds(
+      this.resizeRow,
+      this.resizeCurrentColumn,
+      newColumn,
+      newDuration
+    );
+
+    this.resizeCurrentColumn = newColumn;
   }
 
   private handleDragMove(event: MouseEvent): void {
     const deltaX = event.clientX - this.dragStartX;
     const deltaY = event.clientY - this.dragStartY;
 
-    if (!this.dragHasMoved && (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3)) {
+    if (
+      !this.dragHasMoved &&
+      (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3)
+    ) {
       this.dragHasMoved = true;
     }
 
-    if (!this.dragHasMoved) return;
+    if (!this.dragHasMoved) {
+      return;
+    }
 
-    const deltaSteps = Math.round(deltaX / this.CELL_WIDTH);
-    const deltaRows = Math.round(deltaY / this.ROW_HEIGHT);
+    const deltaSteps = Math.round(deltaX / this.cellWidth);
+    const deltaRows = Math.round(deltaY / this.rowHeight);
 
     let newColumn = this.dragStartColumn + deltaSteps;
     let newRow = this.dragStartRow + deltaRows;
 
     newColumn = Math.max(0, newColumn);
-    newColumn = Math.min(newColumn, this.gridService.steps.length - this.dragDuration);
+    newColumn = Math.min(
+      newColumn,
+      this.gridService.steps.length - this.dragDuration
+    );
 
     newRow = Math.max(0, newRow);
     newRow = Math.min(newRow, PIANO_ROLL_NOTES.length - 1);
 
-    if (newRow !== this.dragCurrentRow || newColumn !== this.dragCurrentColumn) {
+    if (
+      newRow !== this.dragCurrentRow ||
+      newColumn !== this.dragCurrentColumn
+    ) {
       this.gridService.moveNote(
-        this.dragCurrentRow, this.dragCurrentColumn, newRow, newColumn, this.dragDuration
+        this.dragCurrentRow,
+        this.dragCurrentColumn,
+        newRow,
+        newColumn,
+        this.dragDuration
       );
+
       this.dragCurrentRow = newRow;
       this.dragCurrentColumn = newColumn;
     }
@@ -194,6 +253,7 @@ export class PatternVisualizerComponent implements OnChanges {
 
   onTempoChange(delta: number): void {
     const newBpm = this.bpm + delta;
+
     if (newBpm >= 60 && newBpm <= 200) {
       this.bpmChange.emit(newBpm);
     }
