@@ -19,6 +19,10 @@ import { PatternPreview } from '../models/pattern-preview';
 import { AVAILABLE_SCALES, AVAILABLE_KEYS } from '../shared/constants/music-theory.constants';
 import { downloadMidiFile } from '../shared/utils/file-download.util';
 import { LibraryComponent } from '../components/library/library';
+import { AudioService } from '../services/audio';
+import { SequencerService } from '../services/sequencer';
+import { PlaybackSequence } from '../models/playback-sequence';
+
 
 @Component({
   selector: 'app-generator',
@@ -28,7 +32,6 @@ import { LibraryComponent } from '../components/library/library';
     PatternVisualizerComponent,
     LibraryComponent
   ],
-  
   templateUrl: './generator.html',
   styleUrls: ['./generator.css']
 })
@@ -50,7 +53,9 @@ export class GeneratorComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private midiService: MidiGeneratorService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private audioService: AudioService,
+    private sequencerServices: SequencerService
   ) {
     this.patternForm = this.fb.group({
       name: ['Industrial Bassline', Validators.required],
@@ -74,7 +79,6 @@ export class GeneratorComponent implements OnInit {
         debounceTime(300)
       )
       .subscribe(formValues => {
-
         if (this.patternForm.invalid) {
           return;
         }
@@ -88,30 +92,34 @@ export class GeneratorComponent implements OnInit {
             console.error('Preview error:', err);
           }
         });
-
       });
   }
 
   onGenerate(): void {
     if (this.patternForm.valid) {
-      
       const formValues = this.patternForm.value;
 
       this.midiService.generatePattern(formValues).subscribe({
-        
         next: (blob: Blob) => {
           const fileName = formValues.name.replace(/\s+/g, '_') + '.mid';
           downloadMidiFile(blob, fileName);
         },
-
         error: (err: any) => {
           console.error('Connection error:', err);
           alert(
             'Oops! MIDI could not be generated. Is your Spring Boot server running?'
           );
         }
-        
       });
     }
+  }
+
+  public async onPlaySequence(sequence: PlaybackSequence): Promise<void> {
+    await this.audioService.initializeAudio();
+    this.sequencerServices.playSequence(sequence);
+  }
+
+  public onStopSequence(): void {
+    this.sequencerServices.stop();
   }
 }

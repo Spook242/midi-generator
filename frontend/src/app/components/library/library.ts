@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { LibraryItem } from '../../models/library-item';
 import { AudioService } from '../../services/audio';
+import { SequencerService } from '../../services/sequencer';
 import { PlaybackSequence } from '../../models/playback-sequence';
 
 @Component({
@@ -16,7 +17,10 @@ export class LibraryComponent {
     { id: '3', name: 'EBM sequence', bpm: 128, duration: '02:44', isActive: false }
   ];
 
-  constructor(private audioService: AudioService) {}
+  constructor(
+    private audioService: AudioService,
+    private sequencerService: SequencerService
+  ) {}
 
   public async playItem(item: LibraryItem): Promise<void> {
     await this.audioService.initializeAudio();
@@ -27,7 +31,7 @@ export class LibraryComponent {
         { note: 'D2', time: '0:0:0', duration: '16n', velocity: 0.9 },
         { note: 'D2', time: '0:0:1', duration: '16n', velocity: 0.7 },
         { note: 'D2', time: '0:0:2', duration: '16n', velocity: 0.9 },
-        { note: 'F2', time: '0:0:3', duration: '16n', velocity: 1.0 }, // Acento
+        { note: 'F2', time: '0:0:3', duration: '16n', velocity: 1.0 },
         { note: 'D2', time: '0:1:0', duration: '16n', velocity: 0.9 },
         { note: 'D2', time: '0:1:1', duration: '16n', velocity: 0.7 },
         { note: 'C2', time: '0:1:2', duration: '16n', velocity: 0.8 },
@@ -35,6 +39,6 @@ export class LibraryComponent {
       ]
     };
 
-    this.audioService.playSequence(mockSequence);
+    this.sequencerService.playSequence(mockSequence);
   }
 }

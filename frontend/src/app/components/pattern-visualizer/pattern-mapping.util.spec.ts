@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { PIANO_ROLL_NOTES, pitchToRow } from './pattern-mapping.util';
+import { gridToPlaybackSequence } from './pattern-mapping.util';
 
 describe('Pattern Mapping Utils', () => {
   describe('PIANO_ROLL_NOTES', () => {
@@ -34,4 +35,29 @@ describe('Pattern Mapping Utils', () => {
       expect(pitchToRow(35)).toBe(-1);
     });
   });
+
+  describe('gridToPlaybackSequence', () => {
+  it('should translate a note at index 0 to time 0:0:0', () => {
+    const mockDurations = [ [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] ];
+    const result = gridToPlaybackSequence(mockDurations, 120);
+
+    expect(result.notes[0].time).toBe('0:0:0');
+    expect(result.notes[0].note).toBe('C6');
+    expect(result.notes[0].duration).toBe('1 * 16n');
+  });
+
+  it('should correctly calculate the time string for the 6th cell (index 5)', () => {
+    const mockDurations = [ [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] ];
+    const result = gridToPlaybackSequence(mockDurations, 120);
+
+    expect(result.notes[0].time).toBe('0:1:1');
+  });
+
+  it('should return an empty note array if the matrix is empty', () => {
+    const mockDurations = [ [0, 0, 0, 0] ];
+    const result = gridToPlaybackSequence(mockDurations, 120);
+
+    expect(result.notes.length).toBe(0);
+  });
+});
 });
