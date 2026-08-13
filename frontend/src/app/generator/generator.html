@@ -137,7 +137,12 @@
     </aside>
 
     <section class="panel center-panel">
-      <app-pattern-visualizer [preview]="preview"></app-pattern-visualizer>
+      <app-pattern-visualizer 
+        [preview]="preview"
+        [bpm]="patternForm.get('bpm')?.value"
+        (play)="onPlaySequence($event)"
+        (stop)="onStopSequence()">
+      </app-pattern-visualizer>
     </section>
 
     <aside class="panel right-panel">

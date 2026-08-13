@@ -1,3 +1,5 @@
+import { PlaybackSequence } from '../../models/playback-sequence';
+
 export const PIANO_ROLL_NOTES: string[] = [
   'C6', 'B5', 'A#5', 'A5', 'G#5', 'G5', 'F#5', 'F5', 'E5', 'D#5', 'D5', 'C#5', 'C5',
   'B4', 'A#4', 'A4', 'G#4', 'G4', 'F#4', 'F4', 'E4', 'D#4', 'D4', 'C#4', 'C4',
@@ -14,4 +16,38 @@ export function pitchToRow(pitch: number): number {
   ];
 
   return midiNotes.indexOf(pitch);
+}
+
+export function gridToPlaybackSequence(
+  noteDurations: number[][],
+  bpm: number
+): PlaybackSequence {
+  const sequenceNotes = [];
+
+  for (let row = 0; row < noteDurations.length; row++) {
+    for (let col = 0; col < noteDurations[row].length; col++) {
+      const durationInCells = noteDurations[row][col];
+
+      if (durationInCells > 0) {
+        const pitch = PIANO_ROLL_NOTES[row];
+        const bars = Math.floor(col / 16);
+        const quarters = Math.floor((col % 16) / 4);
+        const sixteenths = col % 4;
+        const timeStr = `${bars}:${quarters}:${sixteenths}`;
+        const durationStr = `${durationInCells} * 16n`;
+
+        sequenceNotes.push({
+          note: pitch,
+          time: timeStr,
+          duration: durationStr,
+          velocity: 0.8
+        });
+      }
+    }
+  }
+
+  return {
+    bpm,
+    notes: sequenceNotes
+  };
 }

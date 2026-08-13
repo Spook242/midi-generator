@@ -229,3 +229,7 @@
 .bpm-btn:active {
   transform: scale(0.95);
 }
+
+.control-btn svg {
+  pointer-events: none;
+}
