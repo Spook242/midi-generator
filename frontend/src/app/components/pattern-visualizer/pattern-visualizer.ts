@@ -12,6 +12,8 @@ import { PatternPreview } from '../../models/pattern-preview';
 import { AudioPreview } from '../../services/audio-preview';
 import { PatternGridService } from './pattern-grid.service';
 import { PIANO_ROLL_NOTES } from './pattern-mapping.util';
+import { PlaybackSequence } from '../../models/playback-sequence';
+import { gridToPlaybackSequence } from './pattern-mapping.util';
 
 @Component({
   selector: 'app-pattern-visualizer',
@@ -24,7 +26,7 @@ export class PatternVisualizerComponent implements OnChanges {
   @Input() preview: PatternPreview | null = null;
   @Input() bpm = 120;
 
-  @Output() play = new EventEmitter<void>();
+  @Output() play = new EventEmitter<PlaybackSequence>();
   @Output() stop = new EventEmitter<void>();
   @Output() bpmChange = new EventEmitter<number>();
 
@@ -136,7 +138,6 @@ export class PatternVisualizerComponent implements OnChanges {
     }
 
     if (this.dragging) {
-      // Clic sobre una nota existente sin arrastrarla: eliminarla.
       if (!this.dragHasMoved) {
         this.gridService.toggleCell(
           this.dragStartRow,
@@ -244,7 +245,10 @@ export class PatternVisualizerComponent implements OnChanges {
   }
 
   onPlayClick(): void {
-    this.play.emit();
+    const currentDurations = this.gridService.noteDurations;
+    const sequence = gridToPlaybackSequence(currentDurations, this.bpm);
+    
+    this.play.emit(sequence);
   }
 
   onStopClick(): void {

@@ -7,21 +7,21 @@ import { PlaybackSequence } from '../models/playback-sequence';
 })
 export class AudioService {
 
-  constructor(private ngZone: NgZone) {}
-
   private synth: Tone.PolySynth | null = null;
+  private currentPart: Tone.Part | null = null;
+
+  constructor(private readonly ngZone: NgZone) {}
 
   private getSynth(): Tone.PolySynth {
-  if (!this.synth) {
-    this.synth =
-      new Tone.PolySynth(Tone.Synth).toDestination();
+    if (!this.synth) {
+      this.synth = new Tone.PolySynth(Tone.Synth).toDestination();
+    }
+
+    return this.synth;
   }
 
-  return this.synth;
-}
-
   public async initializeAudio(): Promise<void> {
-    this.ngZone.runOutsideAngular(async () => {
+    await this.ngZone.runOutsideAngular(async () => {
       if (Tone.getContext().state !== 'running') {
         await Tone.start();
       }
@@ -30,22 +30,26 @@ export class AudioService {
 
   public playSequence(sequence: PlaybackSequence): void {
     this.ngZone.runOutsideAngular(() => {
-      const synthInstance = this.getSynth();
+      this.stop();
 
-      Tone.Transport.stop();
-      Tone.Transport.cancel();
+      const synth = this.getSynth();
+
       Tone.Transport.bpm.value = sequence.bpm;
 
-      const currentPart = new Tone.Part((time, noteEvent: any) => {
-        synthInstance.triggerAttackRelease(
-          noteEvent.note,
-          noteEvent.duration,
-          time,
-          noteEvent.velocity
-        );
-      }, sequence.notes);
+      this.currentPart = new Tone.Part(
+        (time, noteEvent) => {
+          synth.triggerAttackRelease(
+            noteEvent.note,
+            noteEvent.duration,
+            time,
+            noteEvent.velocity
+          );
+        },
+        sequence.notes
+      );
 
-      currentPart.start(0);
+      this.currentPart.start(0);
+
       Tone.Transport.start();
     });
   }
@@ -53,6 +57,12 @@ export class AudioService {
   public stop(): void {
     this.ngZone.runOutsideAngular(() => {
       Tone.Transport.stop();
+      Tone.Transport.cancel();
+
+      if (this.currentPart) {
+        this.currentPart.dispose();
+        this.currentPart = null;
+      }
     });
   }
 }
