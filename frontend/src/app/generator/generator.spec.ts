@@ -13,16 +13,15 @@ describe('GeneratorComponent', () => {
 
   beforeEach(async () => {
     mockMidiService = {
-  generatePattern: vi.fn().mockReturnValue(of(new Blob())),
-
-  previewPattern: vi.fn().mockReturnValue(
-    of({
-      name: 'Test',
-      bpm: 120,
-      notes: []
-    })
-  )
-};
+      generatePattern: vi.fn().mockReturnValue(of(new Blob())),
+      previewPattern: vi.fn().mockReturnValue(
+        of({
+          name: 'Test',
+          bpm: 120,
+          notes: []
+        })
+      )
+    };
 
     await TestBed.configureTestingModule({
       imports: [GeneratorComponent, ReactiveFormsModule],
@@ -40,13 +39,13 @@ describe('GeneratorComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should initialize the form with default values (Phrygian scale and C key)', () => {
+  it('should initialize the form with default values (Phrygian scale, C key, and empty pattern)', () => {
     const form = component.patternForm;
     
     expect(form.get('scale')?.value).toBe('Phrygian');
     expect(form.get('key')?.value).toBe('C');
     expect(form.get('bpm')?.value).toBe(120);
-    expect(form.get('pattern')?.value).toBe('Industrial Bassline');
+    expect(form.get('pattern')?.value).toBe(''); // Ahora arranca vacío por defecto
   });
 
   it('should render the exact number of scale options dynamically in the DOM', () => {
@@ -67,12 +66,15 @@ describe('GeneratorComponent', () => {
     expect(options[1].nativeElement.value).toBe('C#');
   });
 
-  it('should render the exact number of pattern options dynamically in the DOM', () => {
+  it('should render pattern options including the placeholder option in the DOM', () => {
     const patternSelect = fixture.debugElement.query(By.css('#patternSelect'));
     const options = patternSelect.queryAll(By.css('option'));
 
-    expect(options.length).toBe(component.patternTypes.length);
-    expect(options[0].nativeElement.textContent.trim()).toBe('Industrial Bassline');
-    expect(options[0].nativeElement.value).toBe('Industrial Bassline');
+    expect(options.length).toBe(component.patternTypes.length + 1);
+    
+    expect(options[0].nativeElement.textContent.trim()).toBe('Select a pattern');
+    expect(options[0].nativeElement.value).toBe('');
+    expect(options[1].nativeElement.textContent.trim()).toBe('Industrial Bassline');
+    expect(options[1].nativeElement.value).toBe('Industrial Bassline');
   });
 });
