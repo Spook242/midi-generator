@@ -1,45 +1,44 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import {
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi
+} from 'vitest';
+
 import { SequencerService } from './sequencer';
-import * as Tone from 'tone';
-
-vi.mock('tone', () => ({
-  Transport: {
-    bpm: {
-      value: 120
-    },
-    start: vi.fn(),
-    stop: vi.fn(),
-    cancel: vi.fn()
-  },
-
-  PolySynth: class {
-    toDestination = vi.fn().mockReturnThis();
-    triggerAttackRelease = vi.fn();
-  },
-
-  Synth: class {},
-
-  Part: class {
-    start = vi.fn();
-    dispose = vi.fn();
-  }
-}));
+import { AudioService } from './audio';
 
 describe('SequencerService', () => {
+
   let service: SequencerService;
 
-  beforeEach(() => {
-    vi.clearAllMocks();
+  let audioService: {
+    playSequence: ReturnType<typeof vi.fn>;
+    stop: ReturnType<typeof vi.fn>;
+  };
 
-    service = new SequencerService();
+  beforeEach(() => {
+
+    audioService = {
+      playSequence: vi.fn(),
+      stop: vi.fn()
+    };
+
+    service = new SequencerService(
+      audioService as unknown as AudioService
+    );
   });
 
   it('should be created correctly', () => {
+
     expect(service).toBeTruthy();
+
   });
 
-  it('should update the Transport BPM when playing', () => {
-    const mockSequence = {
+  it('should delegate sequence playback to AudioService', () => {
+
+    const sequence = {
       bpm: 140,
       notes: [
         {
@@ -51,9 +50,20 @@ describe('SequencerService', () => {
       ]
     };
 
-    service.playSequence(mockSequence as any);
+    service.playSequence(sequence);
 
-    expect(Tone.Transport.bpm.value).toBe(140);
-    expect(Tone.Transport.start).toHaveBeenCalled();
+    expect(audioService.playSequence)
+      .toHaveBeenCalledWith(sequence);
+
   });
+
+  it('should delegate stop to AudioService', () => {
+
+    service.stop();
+
+    expect(audioService.stop)
+      .toHaveBeenCalled();
+
+  });
+
 });
