@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { LibraryComponent } from './library';
 import { AudioService } from '../../services/audio';
+import { SequencerService } from '../../services/sequencer';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { By } from '@angular/platform-browser';
 
@@ -8,17 +9,22 @@ describe('LibraryComponent', () => {
   let component: LibraryComponent;
   let fixture: ComponentFixture<LibraryComponent>;
   let audioServiceMock: any;
+  let sequencerServiceMock: any;
 
   beforeEach(async () => {
     audioServiceMock = {
-      initializeAudio: vi.fn().mockResolvedValue(undefined),
+      initializeAudio: vi.fn().mockResolvedValue(undefined)
+    };
+
+    sequencerServiceMock = {
       playSequence: vi.fn()
     };
 
     await TestBed.configureTestingModule({
       imports: [LibraryComponent],
       providers: [
-        { provide: AudioService, useValue: audioServiceMock }
+        { provide: AudioService, useValue: audioServiceMock },
+        { provide: SequencerService, useValue: sequencerServiceMock }
       ]
     }).compileComponents();
 
@@ -51,18 +57,18 @@ describe('LibraryComponent', () => {
     expect(itemElements[1].classes['active']).toBeFalsy();
   });
 
-  it('should call AudioService to play the sequence when Play button is clicked', async () => {
+  it('should call SequencerService to play the sequence when Play button is clicked', async () => {
     const firstItem = fixture.debugElement.queryAll(By.css('.library-item'))[0];
     const playButton = firstItem.query(By.css('.play-btn')).nativeElement;
 
     playButton.click();
 
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await fixture.whenStable();
 
     expect(audioServiceMock.initializeAudio).toHaveBeenCalled();
-    expect(audioServiceMock.playSequence).toHaveBeenCalled();
+    expect(sequencerServiceMock.playSequence).toHaveBeenCalled();
 
-    const sequencePassed = audioServiceMock.playSequence.mock.calls[0][0];
+    const sequencePassed = sequencerServiceMock.playSequence.mock.calls[0][0];
     expect(sequencePassed.bpm).toBe(120);
     expect(sequencePassed.notes.length).toBe(8);
   });

@@ -31,7 +31,6 @@
 
         <div class="form-group">
           <label for="name">Name</label>
-
           <input
             id="name"
             type="text"
@@ -115,6 +114,7 @@
             id="patternSelect" 
             formControlName="pattern" 
             class="dark-input">
+            <option value="" disabled selected>Select a pattern</option>
             @for (type of patternTypes; track type) {
               <option [value]="type">{{ type }}</option>
             }

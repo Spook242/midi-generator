@@ -24,6 +24,7 @@ import { SequencerService } from '../services/sequencer';
 import { PlaybackSequence } from '../models/playback-sequence';
 
 
+
 @Component({
   selector: 'app-generator',
   standalone: true,
@@ -55,7 +56,7 @@ export class GeneratorComponent implements OnInit {
     private midiService: MidiGeneratorService,
     private cdr: ChangeDetectorRef,
     private audioService: AudioService,
-    private sequencerServices: SequencerService
+    private sequencerServices: SequencerService,
   ) {
     this.patternForm = this.fb.group({
       name: ['Industrial Bassline', Validators.required],
@@ -69,7 +70,7 @@ export class GeneratorComponent implements OnInit {
       ],
       scale: ['Phrygian', Validators.required],
       key: ['C', Validators.required],
-      pattern: ['Industrial Bassline', Validators.required]
+      pattern: ['', Validators.required]
     });
   }
 
