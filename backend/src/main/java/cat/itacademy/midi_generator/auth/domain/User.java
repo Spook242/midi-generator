@@ -1,4 +1,4 @@
-package com.midigen.auth.domain;
+package cat.itacademy.midi_generator.auth.domain;
 
 public class User {
 
@@ -8,7 +8,7 @@ public class User {
     private boolean active;
     private boolean emailVerified;
 
-    private User(UserId id, Email email, HashedPassword password, boolean active, boolean emailVerified) {
+    public User(UserId id, Email email, HashedPassword password, boolean active, boolean emailVerified) {
         this.id = id;
         this.email = email;
         this.password = password;
@@ -43,4 +43,5 @@ public class User {
     public boolean isEmailVerified() {
         return emailVerified;
     }
+
 }

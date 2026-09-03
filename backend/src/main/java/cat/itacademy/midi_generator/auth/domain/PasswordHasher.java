@@ -1,4 +1,4 @@
-package com.midigen.auth.domain;
+package cat.itacademy.midi_generator.auth.domain;
 
 public interface PasswordHasher {
 

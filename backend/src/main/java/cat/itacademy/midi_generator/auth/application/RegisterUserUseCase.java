@@ -1,11 +1,11 @@
-package com.midigen.auth.application;
+package cat.itacademy.midi_generator.auth.application;
 
-import com.midigen.auth.domain.Email;
-import com.midigen.auth.domain.HashedPassword;
-import com.midigen.auth.domain.PasswordHasher;
-import com.midigen.auth.domain.RawPassword;
-import com.midigen.auth.domain.User;
-import com.midigen.auth.domain.UserRepository;
+import cat.itacademy.midi_generator.auth.domain.Email;
+import cat.itacademy.midi_generator.auth.domain.HashedPassword;
+import cat.itacademy.midi_generator.auth.domain.PasswordHasher;
+import cat.itacademy.midi_generator.auth.domain.RawPassword;
+import cat.itacademy.midi_generator.auth.domain.User;
+import cat.itacademy.midi_generator.auth.domain.UserRepository;
 
 public class RegisterUserUseCase {
 
