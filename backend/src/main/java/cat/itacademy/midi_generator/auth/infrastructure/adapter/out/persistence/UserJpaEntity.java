@@ -1,4 +1,4 @@
-package cat.itacademy.midi_generator.infrastructure.adapter.out.persistence;
+package cat.itacademy.midi_generator.auth.infrastructure.adapter.out.persistence;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

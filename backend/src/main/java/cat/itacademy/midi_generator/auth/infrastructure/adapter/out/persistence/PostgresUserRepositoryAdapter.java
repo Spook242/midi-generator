@@ -1,4 +1,4 @@
-package cat.itacademy.midi_generator.infrastructure.adapter.out.persistence;
+package cat.itacademy.midi_generator.auth.infrastructure.adapter.out.persistence;
 
 import cat.itacademy.midi_generator.auth.domain.*;
 import org.springframework.stereotype.Component;

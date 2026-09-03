@@ -1,4 +1,4 @@
-package cat.itacademy.midi_generator.infrastructure.adapter.out.persistence;
+package cat.itacademy.midi_generator.auth.infrastructure.adapter.out.persistence;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
