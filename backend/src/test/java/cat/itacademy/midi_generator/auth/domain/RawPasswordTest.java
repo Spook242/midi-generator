@@ -1,5 +1,6 @@
-package com.midigen.auth.domain;
+package cat.itacademy.midi_generator.auth.domain;
 
+import cat.itacademy.midi_generator.auth.domain.RawPassword;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;

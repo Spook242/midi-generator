@@ -1,5 +1,9 @@
-package com.midigen.auth.domain;
+package cat.itacademy.midi_generator.auth.domain;
 
+import cat.itacademy.midi_generator.auth.domain.Email;
+import cat.itacademy.midi_generator.auth.domain.HashedPassword;
+import cat.itacademy.midi_generator.auth.domain.User;
+import cat.itacademy.midi_generator.auth.domain.UserId;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
