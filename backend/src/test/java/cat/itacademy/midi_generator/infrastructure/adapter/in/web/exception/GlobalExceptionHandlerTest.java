@@ -1,5 +1,6 @@
 package cat.itacademy.midi_generator.infrastructure.adapter.in.web.exception;
 
+import cat.itacademy.midi_generator.auth.domain.exception.UserAlreadyExistsException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +32,16 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
+    void shouldHandleUserAlreadyExistsException() throws Exception {
+        mockMvc.perform(get("/test/conflict")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.status").value(409))
+                .andExpect(jsonPath("$.error").value("Conflict"))
+                .andExpect(jsonPath("$.message").value("The user with the email test@example.com is already registered."));
+    }
+
+    @Test
     void shouldHandleGenericException() throws Exception {
         mockMvc.perform(get("/test/error")
                         .accept(MediaType.APPLICATION_JSON))
@@ -42,6 +53,11 @@ class GlobalExceptionHandlerTest {
 
     @RestController
     static class TestController {
+        @GetMapping("/test/conflict")
+        public void throwConflictException() {
+            throw new UserAlreadyExistsException("test@example.com");
+        }
+
         @GetMapping("/test/error")
         public void throwException() {
             throw new RuntimeException("Test exception");
