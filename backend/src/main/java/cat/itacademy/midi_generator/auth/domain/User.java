@@ -32,8 +32,8 @@ public class User {
         return email;
     }
 
-    public HashedPassword getPassword() {
-        return password;
+    public String getPassword() {
+        return password.value();
     }
 
     public boolean isActive() {

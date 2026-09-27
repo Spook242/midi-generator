@@ -19,7 +19,7 @@ public class PostgresUserRepositoryAdapter implements UserRepository {
         UserJpaEntity entity = new UserJpaEntity(
                 user.getId().value(),
                 user.getEmail().value(),
-                user.getPassword().value(),
+                user.getPassword(),
                 user.isActive(),
                 user.isEmailVerified()
         );

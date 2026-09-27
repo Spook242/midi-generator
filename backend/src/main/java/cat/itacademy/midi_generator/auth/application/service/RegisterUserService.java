@@ -1,24 +1,23 @@
 package cat.itacademy.midi_generator.auth.application.service;
 
-import cat.itacademy.midi_generator.auth.application.port.in.RegisterUserCommand;
+import cat.itacademy.midi_generator.auth.application.port.out.PasswordEncoderPort;
+import cat.itacademy.midi_generator.auth.application.port.in.command.RegisterUserCommand;
 import cat.itacademy.midi_generator.auth.application.port.in.RegisterUserUseCase;
 import cat.itacademy.midi_generator.auth.domain.Email;
-import cat.itacademy.midi_generator.auth.domain.PasswordHasher;
+import cat.itacademy.midi_generator.auth.domain.HashedPassword;
 import cat.itacademy.midi_generator.auth.domain.RawPassword;
 import cat.itacademy.midi_generator.auth.domain.User;
 import cat.itacademy.midi_generator.auth.domain.UserRepository;
 import cat.itacademy.midi_generator.auth.domain.exception.UserAlreadyExistsException;
-import org.springframework.stereotype.Service;
 
-@Service
 public class RegisterUserService implements RegisterUserUseCase {
 
     private final UserRepository userRepository;
-    private final PasswordHasher passwordHasher;
+    private final PasswordEncoderPort passwordEncoder;
 
-    public RegisterUserService(UserRepository userRepository, PasswordHasher passwordHasher) {
+    public RegisterUserService(UserRepository userRepository, PasswordEncoderPort passwordEncoder) {
         this.userRepository = userRepository;
-        this.passwordHasher = passwordHasher;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -30,7 +29,9 @@ public class RegisterUserService implements RegisterUserUseCase {
         }
 
         var rawPassword = new RawPassword(command.rawPassword());
-        var hashedPassword = passwordHasher.hash(rawPassword);
+
+        String encodedString = passwordEncoder.encode(rawPassword.value());
+        var hashedPassword = new HashedPassword(encodedString);
 
         var newUser = User.register(email, hashedPassword);
 
