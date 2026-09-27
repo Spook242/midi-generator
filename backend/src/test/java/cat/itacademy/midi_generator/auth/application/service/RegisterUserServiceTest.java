@@ -1,10 +1,8 @@
 package cat.itacademy.midi_generator.auth.application.service;
 
-import cat.itacademy.midi_generator.auth.application.port.in.RegisterUserCommand;
+import cat.itacademy.midi_generator.auth.application.port.in.command.RegisterUserCommand;
+import cat.itacademy.midi_generator.auth.application.port.out.PasswordEncoderPort;
 import cat.itacademy.midi_generator.auth.domain.Email;
-import cat.itacademy.midi_generator.auth.domain.HashedPassword;
-import cat.itacademy.midi_generator.auth.domain.PasswordHasher;
-import cat.itacademy.midi_generator.auth.domain.RawPassword;
 import cat.itacademy.midi_generator.auth.domain.User;
 import cat.itacademy.midi_generator.auth.domain.UserRepository;
 import cat.itacademy.midi_generator.auth.domain.exception.UserAlreadyExistsException;
@@ -16,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -28,7 +27,7 @@ class RegisterUserServiceTest {
     private UserRepository userRepository;
 
     @Mock
-    private PasswordHasher passwordHasher;
+    private PasswordEncoderPort passwordEncoder;
 
     @InjectMocks
     private RegisterUserService registerUserService;
@@ -36,15 +35,14 @@ class RegisterUserServiceTest {
     @Test
     void shouldRegisterUserSuccessfully() {
         RegisterUserCommand command = new RegisterUserCommand("test@example.com", "SecurePass1!");
-        HashedPassword hashedPassword = new HashedPassword("hashed_secure_pass");
 
         when(userRepository.existsByEmail(any(Email.class))).thenReturn(false);
-        when(passwordHasher.hash(any(RawPassword.class))).thenReturn(hashedPassword);
+        when(passwordEncoder.encode(anyString())).thenReturn("hashed_secure_pass");
 
         registerUserService.register(command);
 
         verify(userRepository, times(1)).existsByEmail(any(Email.class));
-        verify(passwordHasher, times(1)).hash(any(RawPassword.class));
+        verify(passwordEncoder, times(1)).encode(anyString());
         verify(userRepository, times(1)).save(any(User.class));
     }
 
@@ -57,7 +55,7 @@ class RegisterUserServiceTest {
         assertThrows(UserAlreadyExistsException.class, () -> registerUserService.register(command));
 
         verify(userRepository, times(1)).existsByEmail(any(Email.class));
-        verify(passwordHasher, never()).hash(any(RawPassword.class));
+        verify(passwordEncoder, never()).encode(anyString());
         verify(userRepository, never()).save(any(User.class));
     }
 }

@@ -1,14 +1,14 @@
-package cat.itacademy.midi_generator.auth.application.port.in;
+package cat.itacademy.midi_generator.auth.application.port.in.command;
 
-public record RegisterUserCommand(
+public record LoginUserCommand(
         String email,
-        String rawPassword
+        String password
 ) {
-    public RegisterUserCommand {
+    public LoginUserCommand {
         if (email == null || email.isBlank()) {
             throw new IllegalArgumentException("The email cannot be empty.");
         }
-        if (rawPassword == null || rawPassword.isBlank()) {
+        if (password == null || password.isBlank()) {
             throw new IllegalArgumentException("The password cannot be empty.");
         }
     }

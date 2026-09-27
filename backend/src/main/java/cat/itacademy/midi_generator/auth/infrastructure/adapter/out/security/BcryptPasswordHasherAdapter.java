@@ -1,24 +1,26 @@
 package cat.itacademy.midi_generator.auth.infrastructure.adapter.out.security;
 
-import cat.itacademy.midi_generator.auth.domain.HashedPassword;
-import cat.itacademy.midi_generator.auth.domain.PasswordHasher;
-import cat.itacademy.midi_generator.auth.domain.RawPassword;
+import cat.itacademy.midi_generator.auth.application.port.out.PasswordEncoderPort;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
-public class BcryptPasswordHasherAdapter implements PasswordHasher {
+public class BcryptPasswordHasherAdapter implements PasswordEncoderPort {
 
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final PasswordEncoder passwordEncoder;
 
-    @Override
-    public HashedPassword hash(RawPassword rawPassword) {
-        String hashedValue = passwordEncoder.encode(rawPassword.value());
-        return new HashedPassword(hashedValue);
+    public BcryptPasswordHasherAdapter() {
+        this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
     @Override
-    public boolean matches(RawPassword rawPassword, HashedPassword hashedPassword) {
-        return passwordEncoder.matches(rawPassword.value(), hashedPassword.value());
+    public String encode(String rawPassword) {
+        return passwordEncoder.encode(rawPassword);
+    }
+
+    @Override
+    public boolean matches(String rawPassword, String encodedPassword) {
+        return passwordEncoder.matches(rawPassword, encodedPassword);
     }
 }

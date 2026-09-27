@@ -1,7 +1,7 @@
 package cat.itacademy.midi_generator.infrastructure.adapter.in.web;
 
 import cat.itacademy.midi_generator.application.port.in.CreatePatternUseCase;
-import cat.itacademy.midi_generator.config.SecurityConfig;
+import cat.itacademy.midi_generator.shared.infrastructure.config.SecurityConfig;
 import cat.itacademy.midi_generator.domain.MidiPattern;
 import cat.itacademy.midi_generator.domain.Note;
 import cat.itacademy.midi_generator.infrastructure.adapter.in.web.request.CreatePatternRequest;
