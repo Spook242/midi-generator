@@ -1,5 +1,6 @@
 package cat.itacademy.midi_generator.auth.application.port.in;
 
+import cat.itacademy.midi_generator.auth.application.port.in.command.RegisterUserCommand;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

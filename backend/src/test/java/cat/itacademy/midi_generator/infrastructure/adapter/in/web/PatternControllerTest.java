@@ -1,7 +1,7 @@
 package cat.itacademy.midi_generator.infrastructure.adapter.in.web;
 
 import cat.itacademy.midi_generator.application.port.in.CreatePatternUseCase;
-import cat.itacademy.midi_generator.config.SecurityConfig;
+import cat.itacademy.midi_generator.shared.infrastructure.config.SecurityConfig;
 import cat.itacademy.midi_generator.domain.MidiPattern;
 import cat.itacademy.midi_generator.domain.Note;
 import cat.itacademy.midi_generator.infrastructure.adapter.in.web.request.CreatePatternRequest;
@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -23,6 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(PatternController.class)
 @Import(SecurityConfig.class)
+@WithMockUser
 class PatternControllerTest {
 
     @Autowired

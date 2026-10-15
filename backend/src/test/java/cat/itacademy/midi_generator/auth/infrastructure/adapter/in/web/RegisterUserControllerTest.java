@@ -1,7 +1,7 @@
 package cat.itacademy.midi_generator.auth.infrastructure.adapter.in.web;
 
 import cat.itacademy.midi_generator.auth.application.port.in.RegisterUserUseCase;
-import cat.itacademy.midi_generator.config.SecurityConfig;
+import cat.itacademy.midi_generator.shared.infrastructure.config.SecurityConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;

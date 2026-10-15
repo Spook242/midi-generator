@@ -1,6 +1,6 @@
 package cat.itacademy.midi_generator.auth.infrastructure.adapter.in.web;
 
-import cat.itacademy.midi_generator.auth.application.port.in.RegisterUserCommand;
+import cat.itacademy.midi_generator.auth.application.port.in.command.RegisterUserCommand;
 import cat.itacademy.midi_generator.auth.application.port.in.RegisterUserUseCase;
 import cat.itacademy.midi_generator.auth.infrastructure.adapter.in.web.dto.RegisterUserRequest;
 import org.springframework.http.HttpStatus;

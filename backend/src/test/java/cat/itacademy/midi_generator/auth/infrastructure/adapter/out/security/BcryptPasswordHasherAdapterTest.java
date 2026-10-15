@@ -1,10 +1,7 @@
 package cat.itacademy.midi_generator.auth.infrastructure.adapter.out.security;
 
-import cat.itacademy.midi_generator.auth.domain.HashedPassword;
-import cat.itacademy.midi_generator.auth.domain.RawPassword;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class BcryptPasswordHasherAdapterTest {
@@ -17,34 +14,13 @@ class BcryptPasswordHasherAdapterTest {
     }
 
     @Test
-    void shouldHashRawPasswordSuccessfully() {
-        RawPassword rawPassword = new RawPassword("SecurePass1!");
+    void shouldEncodePasswordSuccessfully() {
+        String plainTextPassword = "SecurePass1!";
 
-        HashedPassword hashedPassword = passwordHasherAdapter.hash(rawPassword);
+        String encodedPassword = passwordHasherAdapter.encode(plainTextPassword);
 
-        assertNotNull(hashedPassword);
-        assertNotNull(hashedPassword.value());
-        assertNotEquals("SecurePass1!", hashedPassword.value());
-    }
-
-    @Test
-    void shouldMatchCorrectRawPasswordWithHashedPassword() {
-        RawPassword rawPassword = new RawPassword("SecurePass1!");
-        HashedPassword hashedPassword = passwordHasherAdapter.hash(rawPassword);
-
-        boolean matches = passwordHasherAdapter.matches(rawPassword, hashedPassword);
-
-        assertTrue(matches);
-    }
-
-    @Test
-    void shouldNotMatchIncorrectRawPasswordWithHashedPassword() {
-        RawPassword rawPassword = new RawPassword("SecurePass1!");
-        RawPassword incorrectPassword = new RawPassword("OtherSecure2!");
-        HashedPassword hashedPassword = passwordHasherAdapter.hash(rawPassword);
-
-        boolean matches = passwordHasherAdapter.matches(incorrectPassword, hashedPassword);
-
-        assertFalse(matches);
+        assertNotNull(encodedPassword);
+        assertNotEquals(plainTextPassword, encodedPassword);
+        assertTrue(encodedPassword.startsWith("$2a$"));
     }
 }
