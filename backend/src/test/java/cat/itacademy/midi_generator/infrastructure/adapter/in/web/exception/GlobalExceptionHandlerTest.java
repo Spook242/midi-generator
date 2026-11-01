@@ -42,6 +42,16 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
+    void shouldHandleIllegalArgumentException() throws Exception {
+        mockMvc.perform(get("/test/validation")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("Validation Error"))
+                .andExpect(jsonPath("$.message").value("The email format is invalid."));
+    }
+
+    @Test
     void shouldHandleGenericException() throws Exception {
         mockMvc.perform(get("/test/error")
                         .accept(MediaType.APPLICATION_JSON))
@@ -56,6 +66,11 @@ class GlobalExceptionHandlerTest {
         @GetMapping("/test/conflict")
         public void throwConflictException() {
             throw new UserAlreadyExistsException("test@example.com");
+        }
+
+        @GetMapping("/test/validation")
+        public void throwIllegalArgumentException() {
+            throw new IllegalArgumentException("The email format is invalid.");
         }
 
         @GetMapping("/test/error")

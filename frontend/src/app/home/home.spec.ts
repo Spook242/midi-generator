@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+import { RouterLink } from '@angular/router';
 import { Home } from './home';
 import { provideRouter } from '@angular/router';
 
@@ -20,5 +22,14 @@ describe('Home', () => {
 
   it('debería crear el componente', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('debería enlazar Sign up con /signup', () => {
+    const signupLink = fixture.debugElement
+      .queryAll(By.directive(RouterLink))
+      .find((element) => element.nativeElement.textContent.trim() === 'Sign up');
+
+    expect(signupLink).toBeTruthy();
+    expect(signupLink!.attributes['routerLink']).toBe('/signup');
   });
 });
