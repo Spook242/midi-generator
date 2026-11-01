@@ -1,9 +1,5 @@
 package cat.itacademy.midi_generator.auth.domain;
 
-import cat.itacademy.midi_generator.auth.domain.Email;
-import cat.itacademy.midi_generator.auth.domain.HashedPassword;
-import cat.itacademy.midi_generator.auth.domain.User;
-import cat.itacademy.midi_generator.auth.domain.UserId;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -22,7 +18,7 @@ class UserTest {
         assertNotNull(user.getId());
         assertNotNull(user.getId().value());
         assertEquals(email, user.getEmail());
-        assertEquals(password, user.getPassword());
+        assertEquals(password.value(), user.getPassword());
         assertTrue(user.isActive());
         assertFalse(user.isEmailVerified());
     }
@@ -37,7 +33,7 @@ class UserTest {
 
         assertEquals(id, user.getId());
         assertEquals(email, user.getEmail());
-        assertEquals(password, user.getPassword());
+        assertEquals(password.value(), user.getPassword());
         assertFalse(user.isActive());
         assertTrue(user.isEmailVerified());
     }
