@@ -26,10 +26,10 @@ public class LoginUserService implements LoginUserUseCase {
     @Override
     public String login(LoginUserCommand command) {
         User user = userRepository.findByEmail(new Email(command.email()))
-                .orElseThrow(() -> new InvalidCredentialsException("Invalid Credentials."));
+                .orElseThrow(InvalidCredentialsException::new);
 
         if (!passwordEncoderPort.matches(command.password(), user.getPassword())) {
-            throw new InvalidCredentialsException("Invalid Credentials.");
+            throw new InvalidCredentialsException();
         }
 
         return jwtTokenPort.generateToken(user);

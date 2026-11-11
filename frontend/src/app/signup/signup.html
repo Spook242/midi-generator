@@ -3,9 +3,11 @@
 
   @if (success) {
     <section class="signup-card">
-      <h1>Account created</h1>
-      <p class="subtitle">Your account is ready. You can now log in with your email and password.</p>
-      <a class="btn-blue" routerLink="/generator">Go to home</a>
+      <a class="success-message" routerLink="/generator">
+        <h1>Account created successfully</h1>
+        <p class="subtitle">Your account is ready. Click here to access the Pattern Visualizer.</p>
+      </a>
+      <a class="btn-blue" routerLink="/generator">Go to Pattern Visualizer</a>
     </section>
   } @else {
     <section class="signup-card">
