@@ -54,6 +54,12 @@ export class AudioService {
     });
   }
 
+  public setBpm(bpm: number): void {
+    this.ngZone.runOutsideAngular(() => {
+      Tone.Transport.bpm.value = bpm;
+    });
+  }
+
   public stop(): void {
     this.ngZone.runOutsideAngular(() => {
       Tone.Transport.stop();
