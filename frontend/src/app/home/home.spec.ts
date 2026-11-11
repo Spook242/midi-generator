@@ -24,6 +24,15 @@ describe('Home', () => {
     expect(component).toBeTruthy();
   });
 
+  it('debería enlazar Log in con /login', () => {
+    const loginLink = fixture.debugElement
+      .queryAll(By.directive(RouterLink))
+      .find((element) => element.nativeElement.textContent.trim() === 'Log in');
+
+    expect(loginLink).toBeTruthy();
+    expect(loginLink!.attributes['routerLink']).toBe('/login');
+  });
+
   it('debería enlazar Sign up con /signup', () => {
     const signupLink = fixture.debugElement
       .queryAll(By.directive(RouterLink))

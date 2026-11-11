@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -27,6 +27,7 @@ function passwordsMatch(group: AbstractControl): ValidationErrors | null {
 export class Signup {
   private readonly formBuilder = inject(FormBuilder);
   private readonly authService = inject(AuthService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   submitted = false;
   loading = false;
@@ -69,10 +70,12 @@ export class Signup {
       next: () => {
         this.loading = false;
         this.success = true;
+        this.cdr.markForCheck();
       },
       error: (error: HttpErrorResponse) => {
         this.loading = false;
         this.serverError = this.readErrorMessage(error);
+        this.cdr.markForCheck();
       }
     });
   }

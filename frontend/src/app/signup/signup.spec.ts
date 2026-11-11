@@ -40,7 +40,7 @@ describe('Signup', () => {
     expect(component.submitted).toBe(true);
   });
 
-  it('debería registrar un usuario cuando el formulario es válido', () => {
+  it('debería registrar un usuario cuando el formulario es válido y mostrar el mensaje con enlace a /generator', () => {
     authService.register.mockReturnValue(of(undefined));
 
     component.form.setValue({
@@ -50,12 +50,19 @@ describe('Signup', () => {
     });
 
     component.onSubmit();
+    fixture.detectChanges();
 
     expect(authService.register).toHaveBeenCalledWith({
       email: 'test@example.com',
       password: 'SecurePass1!'
     });
     expect(component.success).toBe(true);
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const successLink = compiled.querySelector('a.success-message');
+    expect(successLink).toBeTruthy();
+    expect(successLink?.textContent).toContain('Account created successfully');
+    expect(successLink?.getAttribute('href')).toBe('/generator');
   });
 
   it('debería mostrar el error del servidor si el email ya existe', () => {

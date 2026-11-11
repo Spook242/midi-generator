@@ -108,3 +108,27 @@ form {
   opacity: 0.7;
   cursor: not-allowed;
 }
+
+.success-message {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: inherit;
+  padding: 1rem;
+  border-radius: 12px;
+  background-color: #ecfdf3;
+  border: 1px solid #abefc6;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.success-message h1 {
+  color: #067647;
+  font-size: 1.5rem;
+}
+
+.success-message:hover {
+  background-color: #d1fadf;
+  transform: translateY(-1px);
+}

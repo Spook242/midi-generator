@@ -1,5 +1,6 @@
 package cat.itacademy.midi_generator.infrastructure.adapter.in.web.exception;
 
+import cat.itacademy.midi_generator.auth.domain.exception.InvalidCredentialsException;
 import cat.itacademy.midi_generator.auth.domain.exception.UserAlreadyExistsException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,6 +43,16 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
+    void shouldHandleInvalidCredentialsException() throws Exception {
+        mockMvc.perform(get("/test/unauthorized")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.error").value("Unauthorized"))
+                .andExpect(jsonPath("$.message").value("Invalid credentials. Access to Pattern Visualizer denied."));
+    }
+
+    @Test
     void shouldHandleIllegalArgumentException() throws Exception {
         mockMvc.perform(get("/test/validation")
                         .accept(MediaType.APPLICATION_JSON))
@@ -66,6 +77,11 @@ class GlobalExceptionHandlerTest {
         @GetMapping("/test/conflict")
         public void throwConflictException() {
             throw new UserAlreadyExistsException("test@example.com");
+        }
+
+        @GetMapping("/test/unauthorized")
+        public void throwInvalidCredentialsException() {
+            throw new InvalidCredentialsException();
         }
 
         @GetMapping("/test/validation")
