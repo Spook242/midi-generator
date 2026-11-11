@@ -16,13 +16,15 @@ describe('SequencerService', () => {
   let audioService: {
     playSequence: ReturnType<typeof vi.fn>;
     stop: ReturnType<typeof vi.fn>;
+    setBpm: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
 
     audioService = {
       playSequence: vi.fn(),
-      stop: vi.fn()
+      stop: vi.fn(),
+      setBpm: vi.fn()
     };
 
     service = new SequencerService(
@@ -63,6 +65,15 @@ describe('SequencerService', () => {
 
     expect(audioService.stop)
       .toHaveBeenCalled();
+
+  });
+
+  it('should delegate setBpm to AudioService', () => {
+
+    service.setBpm(130);
+
+    expect(audioService.setBpm)
+      .toHaveBeenCalledWith(130);
 
   });
 
