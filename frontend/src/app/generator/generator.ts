@@ -14,6 +14,7 @@ import {
 } from '@angular/forms';
 
 import { MidiGeneratorService } from '../services/midi-generator';
+import { PatternGeneratorService } from '../services/pattern-generator.service';
 import { PatternVisualizerComponent } from '../components/pattern-visualizer/pattern-visualizer';
 import { PatternPreview } from '../models/pattern-preview';
 import { AVAILABLE_SCALES, AVAILABLE_KEYS } from '../shared/constants/music-theory.constants';
@@ -54,6 +55,7 @@ export class GeneratorComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private midiService: MidiGeneratorService,
+    private patternGeneratorService: PatternGeneratorService,
     private cdr: ChangeDetectorRef,
     private audioService: AudioService,
     private sequencerServices: SequencerService,
@@ -70,30 +72,46 @@ export class GeneratorComponent implements OnInit {
       ],
       scale: ['Phrygian', Validators.required],
       key: ['C', Validators.required],
-      pattern: ['', Validators.required]
+      pattern: ['Industrial Bassline', Validators.required]
     });
   }
 
   ngOnInit(): void {
+    this.loadPreview(this.patternForm.value);
+
     this.patternForm.valueChanges
       .pipe(
         debounceTime(300)
       )
       .subscribe(formValues => {
-        if (this.patternForm.invalid) {
-          return;
-        }
-
-        this.midiService.previewPattern(formValues).subscribe({
-          next: preview => {
-            this.preview = preview;
-            this.cdr.detectChanges();
-          },
-          error: err => {
-            console.error('Preview error:', err);
-          }
-        });
+        this.loadPreview(formValues);
       });
+  }
+
+  private loadPreview(formValues: any): void {
+    if (this.patternForm.invalid) {
+      return;
+    }
+
+    this.midiService.previewPattern(formValues).subscribe({
+      next: preview => {
+        const hasMatchingBackendPreview =
+          preview &&
+          preview.notes &&
+          preview.notes.length > 0 &&
+          preview.pattern === formValues.pattern;
+
+        this.preview = hasMatchingBackendPreview
+          ? preview
+          : this.patternGeneratorService.generatePreview(formValues);
+        this.cdr.detectChanges();
+      },
+      error: err => {
+        console.error('Preview error:', err);
+        this.preview = this.patternGeneratorService.generatePreview(formValues);
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   onGenerate(): void {

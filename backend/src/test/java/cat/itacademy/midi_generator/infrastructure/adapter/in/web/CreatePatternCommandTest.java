@@ -15,6 +15,18 @@ class CreatePatternCommandTest {
         assertEquals("C", command.key());
         assertEquals("Minor", command.scale());
         assertEquals(1, command.lengthInBars());
+        assertEquals("Industrial Bassline", command.pattern());
+    }
+
+    @Test
+    void shouldAssignRequestedPatternAndDefaultWhenNullOrBlank() {
+        var custom = new CreatePatternUseCase.CreatePatternCommand("EBM", 128, "C", "Phrygian", 2, "EBM Sequence");
+        var withNull = new CreatePatternUseCase.CreatePatternCommand("Default", 120, "C", "Minor", 1, null);
+        var withBlank = new CreatePatternUseCase.CreatePatternCommand("Default", 120, "C", "Minor", 1, "   ");
+
+        assertEquals("EBM Sequence", custom.pattern());
+        assertEquals("Industrial Bassline", withNull.pattern());
+        assertEquals("Industrial Bassline", withBlank.pattern());
     }
 
     @Test

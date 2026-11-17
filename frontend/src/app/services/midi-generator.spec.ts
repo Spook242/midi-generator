@@ -34,7 +34,8 @@ describe('MidiGeneratorService', () => {
       bpm: 120,
       key: 'C',
       scale: 'MAJOR',
-      lengthInBars: 4
+      lengthInBars: 4,
+      pattern: 'Industrial Bassline'
     };
 
     const dummyBlob = new Blob(['midi-binary-content'], { type: 'audio/midi' });
@@ -50,5 +51,33 @@ describe('MidiGeneratorService', () => {
     expect(req.request.responseType).toBe('blob');
 
     req.flush(dummyBlob);
+  });
+
+  it('should send a POST request to /preview with the pattern type included', () => {
+    const mockPayload = {
+      name: 'Preview Pattern',
+      bpm: 128,
+      key: 'C',
+      scale: 'Phrygian',
+      lengthInBars: 4,
+      pattern: 'EBM Sequence'
+    };
+
+    const mockPreview = {
+      name: 'Preview Pattern',
+      bpm: 128,
+      notes: [{ pitch: 60, velocity: 127, startPosition: 0, duration: 1 }]
+    };
+
+    service.previewPattern(mockPayload).subscribe(response => {
+      expect(response).toEqual(mockPreview);
+    });
+
+    const req = httpMock.expectOne('http://localhost:8080/api/v1/patterns/preview');
+
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual(mockPayload);
+
+    req.flush(mockPreview);
   });
 });

@@ -10,8 +10,13 @@ public interface CreatePatternUseCase {
             int bpm,
             String key,
             String scale,
-            int lengthInBars
+            int lengthInBars,
+            String pattern
     ) {
+        public CreatePatternCommand(String name, int bpm, String key, String scale, int lengthInBars) {
+            this(name, bpm, key, scale, lengthInBars, "Industrial Bassline");
+        }
+
         public CreatePatternCommand {
             if (name == null || name.isBlank()) {
                 throw new IllegalArgumentException("The command name cannot be empty.");
@@ -28,6 +33,9 @@ public interface CreatePatternUseCase {
             }
             if (scale == null || scale.isBlank()) {
                 throw new IllegalArgumentException("The scale cannot be empty");
+            }
+            if (pattern == null || pattern.isBlank()) {
+                pattern = "Industrial Bassline";
             }
         }
     }

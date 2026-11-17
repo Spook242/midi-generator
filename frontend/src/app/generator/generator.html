@@ -114,7 +114,7 @@
             id="patternSelect" 
             formControlName="pattern" 
             class="dark-input">
-            <option value="" disabled selected>Select a pattern</option>
+            <option value="" disabled>Select a pattern</option>
             @for (type of patternTypes; track type) {
               <option [value]="type">{{ type }}</option>
             }

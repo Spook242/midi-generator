@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { GeneratorComponent } from './generator';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MidiGeneratorService } from '../services/midi-generator';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { By } from '@angular/platform-browser';
 
@@ -39,13 +39,60 @@ describe('GeneratorComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should initialize the form with default values (Phrygian scale, C key, and empty pattern)', () => {
+  it('should initialize the form with default values (Phrygian scale, C key, and Industrial Bassline pattern) and load initial preview', () => {
     const form = component.patternForm;
     
     expect(form.get('scale')?.value).toBe('Phrygian');
     expect(form.get('key')?.value).toBe('C');
     expect(form.get('bpm')?.value).toBe(120);
-    expect(form.get('pattern')?.value).toBe(''); // Ahora arranca vacío por defecto
+    expect(form.get('pattern')?.value).toBe('Industrial Bassline');
+    expect(form.valid).toBe(true);
+    expect(mockMidiService.previewPattern).toHaveBeenCalledWith(
+      expect.objectContaining({
+        scale: 'Phrygian',
+        key: 'C',
+        bpm: 120,
+        pattern: 'Industrial Bassline'
+      })
+    );
+    expect(component.preview).toBeTruthy();
+    expect(component.preview?.notes.length).toBeGreaterThan(0);
+  });
+
+  it('should request a new preview and update component.preview when pattern changes', async () => {
+    const ebmPreview = {
+      name: 'Industrial Bassline',
+      bpm: 120,
+      pattern: 'EBM Sequence',
+      notes: [
+        { pitch: 60, velocity: 127, startPosition: 0, duration: 1 },
+        { pitch: 61, velocity: 85, startPosition: 2, duration: 1 }
+      ]
+    };
+    mockMidiService.previewPattern.mockReturnValue(of(ebmPreview));
+    mockMidiService.previewPattern.mockClear();
+
+    component.patternForm.patchValue({ pattern: 'EBM Sequence' });
+    await new Promise(resolve => setTimeout(resolve, 350));
+
+    expect(mockMidiService.previewPattern).toHaveBeenCalledWith(
+      expect.objectContaining({ pattern: 'EBM Sequence' })
+    );
+    expect(component.preview).toEqual(ebmPreview);
+  });
+
+  it('should fallback to local PatternGeneratorService when previewPattern fails', async () => {
+    mockMidiService.previewPattern.mockReturnValue(throwError(() => new Error('Network error')));
+    mockMidiService.previewPattern.mockClear();
+
+    component.patternForm.patchValue({ pattern: 'Dark Techno Arp' });
+    await new Promise(resolve => setTimeout(resolve, 350));
+
+    expect(mockMidiService.previewPattern).toHaveBeenCalledWith(
+      expect.objectContaining({ pattern: 'Dark Techno Arp' })
+    );
+    expect(component.preview?.notes.length).toBeGreaterThan(0);
+    expect(component.preview?.notes[1].startPosition).toBe(3);
   });
 
   it('should render the exact number of scale options dynamically in the DOM', () => {

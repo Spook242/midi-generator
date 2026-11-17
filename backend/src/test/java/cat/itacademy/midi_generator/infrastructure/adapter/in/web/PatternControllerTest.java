@@ -17,6 +17,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -43,7 +45,8 @@ class PatternControllerTest {
                 120,
                 "C",
                 "Major",
-                4
+                4,
+                "EBM Sequence"
         );
 
         MidiPattern mockPattern = new MidiPattern("Test Pattern", 120);
@@ -55,6 +58,8 @@ class PatternControllerTest {
                 .andExpect(content().contentType("audio/midi"))
                 .andExpect(header().string("Content-Disposition", "attachment; filename=\"Test_Pattern.mid\""))
                 .andExpect(result -> org.assertj.core.api.Assertions.assertThat(result.getResponse().getContentAsByteArray()).isNotEmpty());
+
+        verify(createPatternUseCase).createPattern(argThat(cmd -> "EBM Sequence".equals(cmd.pattern())));
     }
 
     @Test
@@ -65,7 +70,8 @@ class PatternControllerTest {
                 120,
                 "C",
                 "Major",
-                4
+                4,
+                "Dark Techno Arp"
         );
 
         MidiPattern mockPattern = new MidiPattern("Test Pattern", 120);
@@ -82,11 +88,14 @@ class PatternControllerTest {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.name").value("Test Pattern"))
                 .andExpect(jsonPath("$.bpm").value(120))
+                .andExpect(jsonPath("$.pattern").value("Dark Techno Arp"))
                 .andExpect(jsonPath("$.notes").isArray())
                 .andExpect(jsonPath("$.notes.length()").value(2))
                 .andExpect(jsonPath("$.notes[0].pitch").value(60))
                 .andExpect(jsonPath("$.notes[0].duration").value(1))
                 .andExpect(jsonPath("$.notes[1].pitch").value(64))
                 .andExpect(jsonPath("$.notes[1].duration").value(1));
+
+        verify(createPatternUseCase).createPattern(argThat(cmd -> "Dark Techno Arp".equals(cmd.pattern())));
     }
 }

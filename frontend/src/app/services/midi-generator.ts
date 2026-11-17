@@ -19,6 +19,7 @@ export class MidiGeneratorService {
     key: string;
     scale: string;
     lengthInBars: number;
+    pattern?: string;
   }): Observable<Blob> {
 
     return this.http.post(this.apiUrl, data, {
@@ -32,6 +33,7 @@ export class MidiGeneratorService {
     key: string;
     scale: string;
     lengthInBars: number;
+    pattern?: string;
   }): Observable<PatternPreview> {
 
     return this.http.post<PatternPreview>(

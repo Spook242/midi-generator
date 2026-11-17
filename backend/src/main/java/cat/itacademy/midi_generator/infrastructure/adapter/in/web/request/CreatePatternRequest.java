@@ -17,5 +17,10 @@ public record CreatePatternRequest(
 
         String key,
         String scale,
-        int lengthInBars
-) {}
+        int lengthInBars,
+        String pattern
+) {
+    public CreatePatternRequest(String name, Integer bpm, String key, String scale, int lengthInBars) {
+        this(name, bpm, key, scale, lengthInBars, "Industrial Bassline");
+    }
+}
