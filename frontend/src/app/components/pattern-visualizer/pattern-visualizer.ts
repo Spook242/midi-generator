@@ -1,19 +1,20 @@
 import {
   Component,
+  ElementRef,
   HostListener,
   Input,
   Output,
   EventEmitter,
   OnChanges,
-  SimpleChanges
+  SimpleChanges,
+  ViewChild
 } from '@angular/core';
 
 import { PatternPreview } from '../../models/pattern-preview';
 import { AudioPreview } from '../../services/audio-preview';
 import { PatternGridService } from './pattern-grid.service';
-import { PIANO_ROLL_NOTES } from './pattern-mapping.util';
+import { PIANO_ROLL_NOTES, gridToPlaybackSequence, pitchToRow } from './pattern-mapping.util';
 import { PlaybackSequence } from '../../models/playback-sequence';
-import { gridToPlaybackSequence } from './pattern-mapping.util';
 
 @Component({
   selector: 'app-pattern-visualizer',
@@ -29,6 +30,8 @@ export class PatternVisualizerComponent implements OnChanges {
   @Output() play = new EventEmitter<PlaybackSequence>();
   @Output() stop = new EventEmitter<void>();
   @Output() bpmChange = new EventEmitter<number>();
+
+  @ViewChild('visualizerContainer') visualizerContainer?: ElementRef<HTMLElement>;
 
   readonly notes = PIANO_ROLL_NOTES;
 
@@ -60,7 +63,39 @@ export class PatternVisualizerComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['preview'] && this.preview) {
-      this.gridService.drawPreview(this.preview);
+      const currentPreview = this.preview;
+      this.gridService.drawPreview(currentPreview);
+      if (this.visualizerContainer) {
+        this.scrollToFirstNote(currentPreview);
+      } else {
+        setTimeout(() => this.scrollToFirstNote(currentPreview), 0);
+      }
+    }
+  }
+
+  private scrollToFirstNote(preview: PatternPreview): void {
+    const container = this.visualizerContainer?.nativeElement;
+    if (!container || !preview.notes?.length) {
+      return;
+    }
+
+    const rows = preview.notes
+      .map((note) => pitchToRow(note.pitch))
+      .filter((row) => row >= 0);
+
+    if (rows.length === 0) {
+      return;
+    }
+
+    const minRow = Math.min(...rows);
+    const maxRow = Math.max(...rows);
+    const firstNoteTop = this.rowHeight + minRow * this.rowHeight;
+    const lastNoteBottom = this.rowHeight + (maxRow + 1) * this.rowHeight;
+    const viewTop = container.scrollTop;
+    const viewBottom = viewTop + container.clientHeight;
+
+    if (firstNoteTop < viewTop || lastNoteBottom > viewBottom) {
+      container.scrollTop = Math.max(0, firstNoteTop - this.rowHeight * 2);
     }
   }
 

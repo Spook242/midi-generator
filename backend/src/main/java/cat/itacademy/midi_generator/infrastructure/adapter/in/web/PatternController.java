@@ -40,7 +40,8 @@ public class PatternController {
                 request.bpm(),
                 request.key(),
                 request.scale(),
-                request.lengthInBars()
+                request.lengthInBars(),
+                request.pattern()
         );
 
         MidiPattern pattern = createPatternUseCase.createPattern(command);
@@ -57,7 +58,8 @@ public class PatternController {
         PatternPreviewResponse response = new PatternPreviewResponse(
                 pattern.getName(),
                 pattern.getBpm(),
-                notes
+                notes,
+                command.pattern()
         );
 
         return ResponseEntity.ok(response);
@@ -70,7 +72,8 @@ public class PatternController {
                 request.bpm(),
                 request.key(),
                 request.scale(),
-                request.lengthInBars()
+                request.lengthInBars(),
+                request.pattern()
         );
 
         MidiPattern pattern = createPatternUseCase.createPattern(command);
