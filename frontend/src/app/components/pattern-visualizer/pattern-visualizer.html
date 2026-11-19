@@ -3,7 +3,7 @@
   <div class="brand-title">PATTERN VISUALIZER</div>
   
   <div class="controls-group">
-    <button class="control-btn play-btn" (click)="onPlayClick()">
+    <button class="control-btn play-btn" [class.active]="isPlaying" (click)="onPlayClick()">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none">
         <polygon points="5 3 19 12 5 21 5 3"></polygon>
       </svg>
@@ -40,8 +40,8 @@
     <div class="header">
       <div class="note-title"></div>
 
-      @for (step of gridService.steps; track step) {
-        <div class="step-number">
+      @for (step of gridService.steps; track step; let col = $index) {
+        <div class="step-number" [class.current-step]="col === currentStep">
           {{ step }}
         </div>
       }
@@ -60,6 +60,7 @@
 
             <div
               class="cell note"
+              [class.current-step]="isStepInNote(row, column)"
               [style.--note-duration]="gridService.getNoteDuration(row, column)"
               (mousedown)="startDrag($event, row, column)">
 
@@ -82,6 +83,7 @@
             <div
               class="cell"
               [class.active]="gridService.grid[row][column]"
+              [class.current-step]="column === currentStep"
               (mousedown)="onCellMouseDown($event, row, column)">
             </div>
 

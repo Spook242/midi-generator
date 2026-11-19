@@ -7,5 +7,6 @@ export interface NoteEvent {
 
 export interface PlaybackSequence {
   bpm: number;
+  totalSteps?: number;
   notes: NoteEvent[];
 }

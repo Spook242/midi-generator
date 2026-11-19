@@ -18,11 +18,22 @@ export function pitchToRow(pitch: number): number {
   return midiNotes.indexOf(pitch);
 }
 
+/**
+ * Converts a count or offset in 16th-note steps to Tone.js Transport Bars:Quarters:Sixteenths notation.
+ */
+export function stepsToTransportTime(steps: number): string {
+  const bars = Math.floor(steps / 16);
+  const quarters = Math.floor((steps % 16) / 4);
+  const sixteenths = steps % 4;
+  return `${bars}:${quarters}:${sixteenths}`;
+}
+
 export function gridToPlaybackSequence(
   noteDurations: number[][],
   bpm: number
 ): PlaybackSequence {
   const sequenceNotes = [];
+  const totalSteps = noteDurations[0]?.length ?? 64;
 
   for (let row = 0; row < noteDurations.length; row++) {
     for (let col = 0; col < noteDurations[row].length; col++) {
@@ -30,11 +41,8 @@ export function gridToPlaybackSequence(
 
       if (durationInCells > 0) {
         const pitch = PIANO_ROLL_NOTES[row];
-        const bars = Math.floor(col / 16);
-        const quarters = Math.floor((col % 16) / 4);
-        const sixteenths = col % 4;
-        const timeStr = `${bars}:${quarters}:${sixteenths}`;
-        const durationStr = `${durationInCells} * 16n`;
+        const timeStr = stepsToTransportTime(col);
+        const durationStr = stepsToTransportTime(durationInCells);
 
         sequenceNotes.push({
           note: pitch,
@@ -48,6 +56,7 @@ export function gridToPlaybackSequence(
 
   return {
     bpm,
+    totalSteps,
     notes: sequenceNotes
   };
 }
