@@ -27,6 +27,7 @@ import { Note } from '../../models/note';
 export class PatternVisualizerComponent implements OnChanges {
   @Input() preview: PatternPreview | null = null;
   @Input() bpm = 120;
+  @Input() lengthInBars = 4;
   @Input() currentStep = -1;
   @Input() isPlaying = false;
 
@@ -73,6 +74,13 @@ export class PatternVisualizerComponent implements OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    if (changes['lengthInBars']) {
+      const bars = Number(this.lengthInBars);
+      if (Number.isFinite(bars) && bars >= 1 && bars <= 16) {
+        this.gridService.setStepCount(bars * 16);
+      }
+    }
+
     if (changes['preview'] && this.preview) {
       const currentPreview = this.preview;
       this.gridService.drawPreview(currentPreview);
@@ -314,6 +322,13 @@ export class PatternVisualizerComponent implements OnChanges {
 
   onStopClick(): void {
     this.stop.emit();
+  }
+
+  onClearClick(): void {
+    this.gridService.clearGrid();
+    if (this.isPlaying) {
+      this.stop.emit();
+    }
   }
 
   onTempoChange(delta: number): void {

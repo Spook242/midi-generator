@@ -314,4 +314,27 @@ describe('PatternVisualizerComponent', () => {
       expect(gridService.getNoteDuration(24, 4)).toBe(2); // adjacent note untouched
     });
   });
+
+  describe('Dynamic lengthInBars and Clear button', () => {
+    it('should resize the grid steps when lengthInBars input changes to 1 and 2', () => {
+      fixture.componentRef.setInput('lengthInBars', 1);
+      fixture.detectChanges();
+      expect(gridService.steps.length).toBe(16);
+
+      fixture.componentRef.setInput('lengthInBars', 2);
+      fixture.detectChanges();
+      expect(gridService.steps.length).toBe(32);
+    });
+
+    it('should clear the grid and emit stop when onClearClick() is called while playing', () => {
+      gridService.toggleCell(24, 0);
+      component.isPlaying = true;
+      const stopSpy = vi.spyOn(component.stop, 'emit');
+
+      component.onClearClick();
+
+      expect(gridService.getNoteDuration(24, 0)).toBe(0);
+      expect(stopSpy).toHaveBeenCalledOnce();
+    });
+  });
 });

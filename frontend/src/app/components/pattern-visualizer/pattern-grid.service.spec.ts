@@ -182,4 +182,54 @@ describe('PatternGridService', () => {
       expect(service.getMinStartColumnBefore(24, 9, 6)).toBe(3); // after [1, 3)
     });
   });
+
+  describe('Dynamic step count, overlap-safe manual reinjection, and clearGrid()', () => {
+    it('should resize steps and clamp notes when setStepCount is called with 16 or 32', () => {
+      service.toggleCell(24, 14);
+      service.updateNoteBounds(24, 14, 14, 4); // [14, 18)
+      service.toggleCell(24, 20); // outside 16 steps
+
+      service.setStepCount(16);
+
+      expect(service.steps.length).toBe(16);
+      expect(service.noteDurations[24].length).toBe(16);
+      expect(service.noteDurations[24][14]).toBe(2); // clamped to 16 - 14 = 2
+      expect(service.grid[24][15]).toBe(true);
+
+      service.setStepCount(32);
+      expect(service.steps.length).toBe(32);
+      expect(service.noteDurations[24][14]).toBe(2);
+    });
+
+    it('should respect configured step count in drawPreview and skip manual notes that overlap preview notes', () => {
+      service.setStepCount(16);
+      service.toggleCell(24, 0); // manual note at step 0
+      service.toggleCell(24, 8); // manual note at step 8 (free)
+
+      const preview: PatternPreview = {
+        name: '1-bar',
+        bpm: 120,
+        notes: [
+          { pitch: 60, velocity: 127, startPosition: 0, duration: 2 } // C4 (row 24) [0, 2)
+        ]
+      };
+
+      service.drawPreview(preview);
+
+      expect(service.steps.length).toBe(16);
+      expect(service.noteDurations[24][0]).toBe(2); // preview note not overwritten by manual duration 1
+      expect(service.noteDurations[24][8]).toBe(1); // non-overlapping manual note preserved
+    });
+
+    it('should clear all generated and manual notes in clearGrid()', () => {
+      service.setStepCount(32);
+      service.toggleCell(24, 4);
+      service.clearGrid();
+
+      expect(service.steps.length).toBe(32);
+      expect(service.noteDurations[24][4]).toBe(0);
+      expect(service.manualNoteDurations[24][4]).toBe(0);
+      expect(service.grid[24][4]).toBe(false);
+    });
+  });
 });
