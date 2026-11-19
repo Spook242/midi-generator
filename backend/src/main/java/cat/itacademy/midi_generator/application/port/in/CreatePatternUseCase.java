@@ -1,6 +1,9 @@
 package cat.itacademy.midi_generator.application.port.in;
 
 import cat.itacademy.midi_generator.domain.MidiPattern;
+import cat.itacademy.midi_generator.domain.Note;
+
+import java.util.List;
 
 public interface CreatePatternUseCase {
     MidiPattern createPattern(CreatePatternCommand command);
@@ -11,10 +14,15 @@ public interface CreatePatternUseCase {
             String key,
             String scale,
             int lengthInBars,
-            String pattern
+            String pattern,
+            List<Note> notes
     ) {
         public CreatePatternCommand(String name, int bpm, String key, String scale, int lengthInBars) {
-            this(name, bpm, key, scale, lengthInBars, "Industrial Bassline");
+            this(name, bpm, key, scale, lengthInBars, "Industrial Bassline", List.of());
+        }
+
+        public CreatePatternCommand(String name, int bpm, String key, String scale, int lengthInBars, String pattern) {
+            this(name, bpm, key, scale, lengthInBars, pattern, List.of());
         }
 
         public CreatePatternCommand {
@@ -37,6 +45,7 @@ public interface CreatePatternUseCase {
             if (pattern == null || pattern.isBlank()) {
                 pattern = "Industrial Bassline";
             }
+            notes = notes == null ? List.of() : List.copyOf(notes);
         }
     }
 }

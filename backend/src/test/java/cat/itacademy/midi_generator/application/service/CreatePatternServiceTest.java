@@ -3,7 +3,10 @@ package cat.itacademy.midi_generator.application.service;
 import cat.itacademy.midi_generator.application.port.in.CreatePatternUseCase.CreatePatternCommand;
 import cat.itacademy.midi_generator.application.port.out.PatternRepository;
 import cat.itacademy.midi_generator.domain.MidiPattern;
+import cat.itacademy.midi_generator.domain.Note;
 import org.junit.jupiter.api.BeforeEach;
+
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -110,5 +113,22 @@ class CreatePatternServiceTest {
         assertThat(result.getNotes()).hasSize(6);
         assertThat(result.getNotes().subList(0, 3)).allMatch(n -> n.startPosition() == 0 && n.duration() == 8 && n.velocity() == 95);
         assertThat(result.getNotes().subList(3, 6)).allMatch(n -> n.startPosition() == 8 && n.duration() == 8 && n.velocity() == 95);
+    }
+
+    @Test
+    void shouldUseCustomNotesDirectlyWhenProvidedInCommand() {
+        List<Note> customNotes = List.of(
+                new Note(48, 110, 4, 2),
+                new Note(55, 90, 4, 2)
+        );
+        CreatePatternCommand command = new CreatePatternCommand(
+                "Custom Edited", 120, "C", "Phrygian", 4, "Industrial Bassline", customNotes
+        );
+
+        when(patternRepository.save(any(MidiPattern.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        MidiPattern result = createPatternService.createPattern(command);
+
+        assertThat(result.getNotes()).containsExactlyElementsOf(customNotes);
     }
 }

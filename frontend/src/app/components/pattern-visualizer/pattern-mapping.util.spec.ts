@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { PIANO_ROLL_NOTES, gridToPlaybackSequence, pitchToRow, stepsToTransportTime } from './pattern-mapping.util';
+import { PIANO_ROLL_NOTES, gridToMidiNotes, gridToPlaybackSequence, pitchToRow, stepsToTransportTime } from './pattern-mapping.util';
 
 describe('Pattern Mapping Utils', () => {
   describe('PIANO_ROLL_NOTES', () => {
@@ -78,4 +78,21 @@ describe('Pattern Mapping Utils', () => {
     expect(result.totalSteps).toBe(4);
   });
 });
+
+  describe('gridToMidiNotes()', () => {
+    it('should convert active grid cells into sorted Note objects with MIDI pitch, startPosition, duration, and velocity', () => {
+      const matrix = Array.from({ length: 49 }, () => Array(16).fill(0));
+      matrix[24][4] = 2; // C4 (60) at step 4, duration 2
+      matrix[0][1] = 3;  // C6 (84) at step 1, duration 3
+      matrix[12][4] = 1; // C5 (72) at step 4, duration 1 (same step as C4, higher pitch)
+
+      const notes = gridToMidiNotes(matrix, 110);
+
+      expect(notes).toEqual([
+        { pitch: 84, velocity: 110, startPosition: 1, duration: 3 },
+        { pitch: 60, velocity: 110, startPosition: 4, duration: 2 },
+        { pitch: 72, velocity: 110, startPosition: 4, duration: 1 }
+      ]);
+    });
+  });
 });

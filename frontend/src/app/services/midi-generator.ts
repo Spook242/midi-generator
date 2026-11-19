@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { PatternPreview } from '../models/pattern-preview';
+import { Note } from '../models/note';
 
 @Injectable({
   providedIn: 'root'
@@ -20,6 +21,7 @@ export class MidiGeneratorService {
     scale: string;
     lengthInBars: number;
     pattern?: string;
+    notes?: Note[];
   }): Observable<Blob> {
 
     return this.http.post(this.apiUrl, data, {

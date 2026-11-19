@@ -2,7 +2,8 @@ import {
   Component,
   OnDestroy,
   OnInit,
-  ChangeDetectorRef
+  ChangeDetectorRef,
+  ViewChild
 } from '@angular/core';
 
 import { Subscription, debounceTime } from 'rxjs';
@@ -39,6 +40,8 @@ import { PlaybackSequence } from '../models/playback-sequence';
   styleUrls: ['./generator.css']
 })
 export class GeneratorComponent implements OnInit, OnDestroy {
+
+  @ViewChild(PatternVisualizerComponent) visualizer?: PatternVisualizerComponent;
 
   patternForm: FormGroup;
   preview: PatternPreview | null = null;
@@ -142,8 +145,9 @@ export class GeneratorComponent implements OnInit, OnDestroy {
   onGenerate(): void {
     if (this.patternForm.valid) {
       const formValues = this.patternForm.value;
+      const notes = this.visualizer?.getCurrentNotes() ?? [];
 
-      this.midiService.generatePattern(formValues).subscribe({
+      this.midiService.generatePattern({ ...formValues, notes }).subscribe({
         next: (blob: Blob) => {
           const fileName = formValues.name.replace(/\s+/g, '_') + '.mid';
           downloadMidiFile(blob, fileName);

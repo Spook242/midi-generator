@@ -1,8 +1,10 @@
+import { ChangeDetectorRef } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { GeneratorComponent } from './generator';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MidiGeneratorService } from '../services/midi-generator';
 import { SequencerService } from '../services/sequencer';
+import { PatternVisualizerComponent } from '../components/pattern-visualizer/pattern-visualizer';
 import { of, throwError } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { By } from '@angular/platform-browser';
@@ -144,5 +146,39 @@ describe('GeneratorComponent', () => {
 
     expect(component.patternForm.get('bpm')?.value).toBe(120);
     expect(setBpmSpy).toHaveBeenCalledWith(120);
+  });
+
+  it('should include edited visualizer grid notes when calling onGenerate()', () => {
+    const visualizerDebug = fixture.debugElement.query(By.directive(PatternVisualizerComponent));
+    const visualizer = visualizerDebug.componentInstance as PatternVisualizerComponent;
+
+    // Add a manual note on row 0 (C6 = MIDI 84), column 1
+    visualizer.gridService.toggleCell(0, 1);
+    visualizerDebug.injector.get(ChangeDetectorRef).markForCheck();
+    fixture.detectChanges();
+
+    const originalCreateObjectURL = window.URL.createObjectURL;
+    const originalRevokeObjectURL = window.URL.revokeObjectURL;
+    window.URL.createObjectURL = vi.fn().mockReturnValue('blob:mock');
+    window.URL.revokeObjectURL = vi.fn();
+    const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+
+    try {
+      component.onGenerate();
+
+      expect(mockMidiService.generatePattern).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'Industrial Bassline',
+          pattern: 'Industrial Bassline',
+          notes: expect.arrayContaining([
+            expect.objectContaining({ pitch: 84, startPosition: 1, duration: 1 })
+          ])
+        })
+      );
+    } finally {
+      window.URL.createObjectURL = originalCreateObjectURL;
+      window.URL.revokeObjectURL = originalRevokeObjectURL;
+      clickSpy.mockRestore();
+    }
   });
 });

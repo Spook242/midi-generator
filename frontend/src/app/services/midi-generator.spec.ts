@@ -35,7 +35,10 @@ describe('MidiGeneratorService', () => {
       key: 'C',
       scale: 'MAJOR',
       lengthInBars: 4,
-      pattern: 'Industrial Bassline'
+      pattern: 'Industrial Bassline',
+      notes: [
+        { pitch: 60, velocity: 100, startPosition: 0, duration: 2 }
+      ]
     };
 
     const dummyBlob = new Blob(['midi-binary-content'], { type: 'audio/midi' });

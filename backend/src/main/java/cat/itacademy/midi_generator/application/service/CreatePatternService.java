@@ -71,6 +71,12 @@ public class CreatePatternService implements CreatePatternUseCase {
     public MidiPattern createPattern(CreatePatternCommand command) {
         MidiPattern pattern = new MidiPattern(command.name(), command.bpm());
 
+        if (!command.notes().isEmpty()) {
+            command.notes().forEach(pattern::addNote);
+            patternRepository.save(pattern);
+            return pattern;
+        }
+
         PitchClass rootPitch = PitchClass.fromString(command.key());
         MusicalScale scale = MusicalScale.fromString(command.scale());
         List<Integer> availablePitches = scale.generatePitches(rootPitch);

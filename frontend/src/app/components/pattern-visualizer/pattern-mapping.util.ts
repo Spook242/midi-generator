@@ -1,4 +1,5 @@
 import { PlaybackSequence } from '../../models/playback-sequence';
+import { Note } from '../../models/note';
 
 export const PIANO_ROLL_NOTES: string[] = [
   'C6', 'B5', 'A#5', 'A5', 'G#5', 'G5', 'F#5', 'F5', 'E5', 'D#5', 'D5', 'C#5', 'C5',
@@ -7,15 +8,43 @@ export const PIANO_ROLL_NOTES: string[] = [
   'B2', 'A#2', 'A2', 'G#2', 'G2', 'F#2', 'F2', 'E2', 'D#2', 'D2', 'C#2', 'C2'
 ];
 
-export function pitchToRow(pitch: number): number {
-  const midiNotes = [
-    84, 83, 82, 81, 80, 79, 78, 77, 76, 75, 74, 73, 72,
-    71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60,
-    59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48,
-    47, 46, 45, 44, 43, 42, 41, 40, 39, 38, 37, 36
-  ];
+const PIANO_ROLL_MIDI_NOTES: number[] = [
+  84, 83, 82, 81, 80, 79, 78, 77, 76, 75, 74, 73, 72,
+  71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60,
+  59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48,
+  47, 46, 45, 44, 43, 42, 41, 40, 39, 38, 37, 36
+];
 
-  return midiNotes.indexOf(pitch);
+export function pitchToRow(pitch: number): number {
+  return PIANO_ROLL_MIDI_NOTES.indexOf(pitch);
+}
+
+/**
+ * Extracts active notes from the piano-roll duration matrix ordered by step and pitch.
+ */
+export function gridToMidiNotes(noteDurations: number[][], defaultVelocity = 100): Note[] {
+  const notes: Note[] = [];
+
+  for (let row = 0; row < noteDurations.length; row++) {
+    const pitch = PIANO_ROLL_MIDI_NOTES[row];
+    if (pitch === undefined) {
+      continue;
+    }
+
+    for (let col = 0; col < noteDurations[row].length; col++) {
+      const duration = noteDurations[row][col];
+      if (duration > 0) {
+        notes.push({
+          pitch,
+          velocity: defaultVelocity,
+          startPosition: col,
+          duration
+        });
+      }
+    }
+  }
+
+  return notes.sort((a, b) => a.startPosition - b.startPosition || a.pitch - b.pitch);
 }
 
 /**

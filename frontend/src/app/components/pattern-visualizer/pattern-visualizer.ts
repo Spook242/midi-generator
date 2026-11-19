@@ -13,8 +13,9 @@ import {
 import { PatternPreview } from '../../models/pattern-preview';
 import { AudioPreview } from '../../services/audio-preview';
 import { PatternGridService } from './pattern-grid.service';
-import { PIANO_ROLL_NOTES, gridToPlaybackSequence, pitchToRow } from './pattern-mapping.util';
+import { PIANO_ROLL_NOTES, gridToMidiNotes, gridToPlaybackSequence, pitchToRow } from './pattern-mapping.util';
 import { PlaybackSequence } from '../../models/playback-sequence';
+import { Note } from '../../models/note';
 
 @Component({
   selector: 'app-pattern-visualizer',
@@ -294,6 +295,10 @@ export class PatternVisualizerComponent implements OnChanges {
     const sequence = gridToPlaybackSequence(currentDurations, this.bpm);
     
     this.play.emit(sequence);
+  }
+
+  getCurrentNotes(): Note[] {
+    return gridToMidiNotes(this.gridService.noteDurations);
   }
 
   onStopClick(): void {

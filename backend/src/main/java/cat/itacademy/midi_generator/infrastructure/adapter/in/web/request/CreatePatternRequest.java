@@ -1,9 +1,12 @@
 package cat.itacademy.midi_generator.infrastructure.adapter.in.web.request;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+
+import java.util.List;
 
 public record CreatePatternRequest(
 
@@ -18,9 +21,14 @@ public record CreatePatternRequest(
         String key,
         String scale,
         int lengthInBars,
-        String pattern
+        String pattern,
+        @Valid List<NoteRequest> notes
 ) {
     public CreatePatternRequest(String name, Integer bpm, String key, String scale, int lengthInBars) {
-        this(name, bpm, key, scale, lengthInBars, "Industrial Bassline");
+        this(name, bpm, key, scale, lengthInBars, "Industrial Bassline", List.of());
+    }
+
+    public CreatePatternRequest(String name, Integer bpm, String key, String scale, int lengthInBars, String pattern) {
+        this(name, bpm, key, scale, lengthInBars, pattern, List.of());
     }
 }
