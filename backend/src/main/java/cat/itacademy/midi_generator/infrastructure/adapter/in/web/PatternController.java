@@ -25,6 +25,9 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:4200")
 public class PatternController {
 
+    private static final int MIDI_PPQ = 480;
+    private static final long TICKS_PER_SIXTEENTH = MIDI_PPQ / 4L;
+
     private final CreatePatternUseCase createPatternUseCase;
 
     public PatternController(CreatePatternUseCase createPatternUseCase) {
@@ -67,13 +70,20 @@ public class PatternController {
 
     @PostMapping
     public ResponseEntity<byte[]> createPattern(@Valid @RequestBody CreatePatternRequest request) {
+        List<Note> customNotes = request.notes() == null
+                ? List.of()
+                : request.notes().stream()
+                .map(n -> new Note(n.pitch(), n.velocity(), n.startPosition(), n.duration()))
+                .toList();
+
         var command = new CreatePatternCommand(
                 request.name(),
                 request.bpm(),
                 request.key(),
                 request.scale(),
                 request.lengthInBars(),
-                request.pattern()
+                request.pattern(),
+                customNotes
         );
 
         MidiPattern pattern = createPatternUseCase.createPattern(command);
@@ -93,7 +103,7 @@ public class PatternController {
     }
 
     private byte[] generateMidiBytes(MidiPattern pattern) throws Exception {
-        Sequence sequence = new Sequence(Sequence.PPQ, 4);
+        Sequence sequence = new Sequence(Sequence.PPQ, MIDI_PPQ);
         Track track = sequence.createTrack();
 
         int microsecondsPerQuarterNote = 60000000 / pattern.getBpm();
@@ -106,17 +116,17 @@ public class PatternController {
         tempoMessage.setMessage(0x51, tempoData, 3);
         track.add(new MidiEvent(tempoMessage, 0));
 
-        long tick = 0;
         for (Note note : pattern.getNotes()) {
-            ShortMessage on = new ShortMessage();
-            on.setMessage(ShortMessage.NOTE_ON, 0, note.pitch(), 90);
-            track.add(new MidiEvent(on, tick));
+            long startTick = note.startPosition() * TICKS_PER_SIXTEENTH;
+            long endTick = (note.startPosition() + note.duration()) * TICKS_PER_SIXTEENTH;
 
-            tick += (long) (note.duration() * 4);
+            ShortMessage on = new ShortMessage();
+            on.setMessage(ShortMessage.NOTE_ON, 0, note.pitch(), note.velocity());
+            track.add(new MidiEvent(on, startTick));
 
             ShortMessage off = new ShortMessage();
             off.setMessage(ShortMessage.NOTE_OFF, 0, note.pitch(), 0);
-            track.add(new MidiEvent(off, tick));
+            track.add(new MidiEvent(off, endTick));
         }
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();

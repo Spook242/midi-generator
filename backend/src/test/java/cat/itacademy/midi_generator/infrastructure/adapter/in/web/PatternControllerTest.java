@@ -5,8 +5,18 @@ import cat.itacademy.midi_generator.shared.infrastructure.config.SecurityConfig;
 import cat.itacademy.midi_generator.domain.MidiPattern;
 import cat.itacademy.midi_generator.domain.Note;
 import cat.itacademy.midi_generator.infrastructure.adapter.in.web.request.CreatePatternRequest;
+import cat.itacademy.midi_generator.infrastructure.adapter.in.web.request.NoteRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+
+import javax.sound.midi.MidiEvent;
+import javax.sound.midi.MidiSystem;
+import javax.sound.midi.Sequence;
+import javax.sound.midi.ShortMessage;
+import javax.sound.midi.Track;
+import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
@@ -97,5 +107,63 @@ class PatternControllerTest {
                 .andExpect(jsonPath("$.notes[1].duration").value(1));
 
         verify(createPatternUseCase).createPattern(argThat(cmd -> "Dark Techno Arp".equals(cmd.pattern())));
+    }
+
+    @Test
+    void shouldExportEditedNotesWithAccurateMidiTicksVelocityAndPolyphony() throws Exception {
+        CreatePatternRequest request = new CreatePatternRequest(
+                "Edited Pattern",
+                125,
+                "C",
+                "Phrygian",
+                4,
+                "Industrial Bassline",
+                List.of(
+                        new NoteRequest(60, 110, 4, 2),
+                        new NoteRequest(67, 75, 4, 3)
+                )
+        );
+
+        MidiPattern mockPattern = new MidiPattern("Edited Pattern", 125);
+        mockPattern.addNote(new Note(60, 110, 4, 2));
+        mockPattern.addNote(new Note(67, 75, 4, 3));
+
+        when(createPatternUseCase.createPattern(any())).thenReturn(mockPattern);
+
+        byte[] midiBytes = mockMvc.perform(post("/api/v1/patterns")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType("audio/midi"))
+                .andReturn()
+                .getResponse()
+                .getContentAsByteArray();
+
+        verify(createPatternUseCase).createPattern(argThat(cmd ->
+                cmd.notes().size() == 2 &&
+                        cmd.notes().get(0).pitch() == 60 &&
+                        cmd.notes().get(0).startPosition() == 4 &&
+                        cmd.notes().get(1).pitch() == 67
+        ));
+
+        Sequence sequence = MidiSystem.getSequence(new ByteArrayInputStream(midiBytes));
+        org.assertj.core.api.Assertions.assertThat(sequence.getResolution()).isEqualTo(480);
+
+        Track track = sequence.getTracks()[0];
+        List<String> noteEvents = new ArrayList<>();
+        for (int i = 0; i < track.size(); i++) {
+            MidiEvent event = track.get(i);
+            if (event.getMessage() instanceof ShortMessage sm &&
+                    (sm.getCommand() == ShortMessage.NOTE_ON || sm.getCommand() == ShortMessage.NOTE_OFF)) {
+                noteEvents.add(sm.getCommand() + ":" + sm.getData1() + ":" + sm.getData2() + "@" + event.getTick());
+            }
+        }
+
+        org.assertj.core.api.Assertions.assertThat(noteEvents).containsExactlyInAnyOrder(
+                ShortMessage.NOTE_ON + ":60:110@480",
+                ShortMessage.NOTE_ON + ":67:75@480",
+                ShortMessage.NOTE_OFF + ":60:0@720",
+                ShortMessage.NOTE_OFF + ":67:0@840"
+        );
     }
 }
