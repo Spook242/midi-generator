@@ -240,6 +240,11 @@
   box-shadow: 0 0 10px rgba(0, 102, 255, 0.5);
 }
 
+.control-btn.clear-btn:hover {
+  background: rgba(239, 68, 68, 0.25);
+  color: #f87171;
+}
+
 .step-number.current-step {
   color: #ffffff;
   background: rgba(0, 102, 255, 0.35);

@@ -5,6 +5,7 @@ import { PIANO_ROLL_NOTES, pitchToRow } from './pattern-mapping.util';
 @Injectable()
 export class PatternGridService {
   steps: number[] = Array.from({ length: 64 }, (_, i) => i + 1);
+  private configuredSteps: number | null = null;
 
   grid: boolean[][] = this.createEmptyMatrix(this.steps.length, false);
   noteDurations: number[][] = this.createEmptyMatrix(this.steps.length, 0);
@@ -12,6 +13,57 @@ export class PatternGridService {
 
   private createEmptyMatrix<T>(columns: number, defaultValue: T): T[][] {
     return PIANO_ROLL_NOTES.map(() => Array(columns).fill(defaultValue));
+  }
+
+  /**
+   * Resizes the piano-roll grid to the requested number of 16th-note steps while preserving valid notes.
+   */
+  setStepCount(totalSteps: number): void {
+    const validSteps = Math.max(16, Math.floor(totalSteps));
+    this.configuredSteps = validSteps;
+
+    if (validSteps === this.steps.length) {
+      return;
+    }
+
+    const previousDurations = this.noteDurations;
+    const previousManualDurations = this.manualNoteDurations;
+
+    this.steps = Array.from({ length: validSteps }, (_, i) => i + 1);
+    this.grid = this.createEmptyMatrix(validSteps, false);
+    this.noteDurations = this.createEmptyMatrix(validSteps, 0);
+    this.manualNoteDurations = this.createEmptyMatrix(validSteps, 0);
+
+    for (let row = 0; row < PIANO_ROLL_NOTES.length; row++) {
+      for (let col = 0; col < validSteps; col++) {
+        const duration = previousDurations[row]?.[col] ?? 0;
+        if (duration > 0) {
+          const clampedDuration = Math.min(duration, validSteps - col);
+          this.noteDurations[row][col] = clampedDuration;
+          this.fillGridCells(row, col, clampedDuration);
+        }
+
+        const manualDuration = previousManualDurations[row]?.[col] ?? 0;
+        if (manualDuration > 0) {
+          this.manualNoteDurations[row][col] = Math.min(manualDuration, validSteps - col);
+        }
+      }
+    }
+  }
+
+  /**
+   * Clears all generated and manually placed notes while keeping the current step count.
+   */
+  clearGrid(): void {
+    this.grid = this.createEmptyMatrix(this.steps.length, false);
+    this.noteDurations = this.createEmptyMatrix(this.steps.length, 0);
+    this.manualNoteDurations = this.createEmptyMatrix(this.steps.length, 0);
+  }
+
+  private fillGridCells(row: number, column: number, duration: number): void {
+    for (let i = 0; i < duration && column + i < this.steps.length; i++) {
+      this.grid[row][column + i] = true;
+    }
   }
 
   toggleCell(row: number, column: number): void {
@@ -203,7 +255,7 @@ export class PatternGridService {
     return true;
   }
 
-  drawPreview(preview: PatternPreview | null): void {
+  drawPreview(preview: PatternPreview | null, targetSteps?: number): void {
     if (!preview || preview.notes.length === 0) {
       return;
     }
@@ -213,8 +265,13 @@ export class PatternGridService {
       0,
       ...preview.notes.map((note) => note.startPosition + note.duration)
     );
-    
-    const totalSteps = Math.max(64, previewSteps);
+
+    const totalSteps =
+      targetSteps && targetSteps > 0
+        ? targetSteps
+        : this.configuredSteps !== null
+          ? Math.max(this.configuredSteps, previewSteps)
+          : Math.max(64, previewSteps);
 
     this.steps = Array.from({ length: totalSteps }, (_, i) => i + 1);
 
@@ -240,14 +297,13 @@ export class PatternGridService {
         continue;
       }
 
-      this.noteDurations[row][column] = note.duration;
-
-      for (let i = 0; i < note.duration; i++) {
-        const currentColumn = column + i;
-        if (currentColumn >= 0 && currentColumn < this.steps.length) {
-          this.grid[row][currentColumn] = true;
-        }
+      const clampedDuration = Math.min(note.duration, this.steps.length - column);
+      if (clampedDuration <= 0 || this.hasNoteOverlap(row, column, clampedDuration)) {
+        continue;
       }
+
+      this.noteDurations[row][column] = clampedDuration;
+      this.fillGridCells(row, column, clampedDuration);
     }
 
     for (let row = 0; row < PIANO_ROLL_NOTES.length; row++) {
@@ -258,14 +314,13 @@ export class PatternGridService {
           continue;
         }
 
-        this.noteDurations[row][column] = duration;
-
-        for (let i = 0; i < duration; i++) {
-          const currentColumn = column + i;
-          if (currentColumn >= 0 && currentColumn < this.steps.length) {
-            this.grid[row][currentColumn] = true;
-          }
+        const clampedDuration = Math.min(duration, this.steps.length - column);
+        if (clampedDuration <= 0 || this.hasNoteOverlap(row, column, clampedDuration)) {
+          continue;
         }
+
+        this.noteDurations[row][column] = clampedDuration;
+        this.fillGridCells(row, column, clampedDuration);
       }
     }
   }

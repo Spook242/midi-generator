@@ -140,6 +140,7 @@
       <app-pattern-visualizer 
         [preview]="preview"
         [bpm]="patternForm.get('bpm')?.value"
+        [lengthInBars]="patternForm.get('lengthInBars')?.value"
         [currentStep]="currentStep"
         [isPlaying]="isPlaying"
         (play)="onPlaySequence($event)"
