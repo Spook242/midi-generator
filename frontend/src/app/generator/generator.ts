@@ -166,4 +166,9 @@ export class GeneratorComponent implements OnInit, OnDestroy {
   public onStopSequence(): void {
     this.sequencerServices.stop();
   }
+
+  public onBpmChange(newBpm: number): void {
+    this.patternForm.get('bpm')?.setValue(newBpm);
+    this.sequencerServices.setBpm(newBpm);
+  }
 }
