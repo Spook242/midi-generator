@@ -235,4 +235,45 @@ describe('PatternVisualizerComponent', () => {
     });
   });
 });
+
+  describe('Playhead and playback state', () => {
+    it('should return true from isStepInNote when currentStep falls inside the note span', () => {
+      gridService.toggleCell(24, 2);
+      gridService.updateNoteBounds(24, 2, 2, 4);
+
+      component.currentStep = 1;
+      expect(component.isStepInNote(24, 2)).toBe(false);
+
+      component.currentStep = 2;
+      expect(component.isStepInNote(24, 2)).toBe(true);
+
+      component.currentStep = 5;
+      expect(component.isStepInNote(24, 2)).toBe(true);
+
+      component.currentStep = 6;
+      expect(component.isStepInNote(24, 2)).toBe(false);
+    });
+
+    it('should highlight the play button and current step column when playing', () => {
+      gridService.toggleCell(24, 0);
+      gridService.updateNoteBounds(24, 0, 0, 2);
+
+      fixture.componentRef.setInput('isPlaying', true);
+      fixture.componentRef.setInput('currentStep', 0);
+      fixture.detectChanges();
+
+      const el = fixture.nativeElement as HTMLElement;
+      expect(el.querySelector('.play-btn')?.classList.contains('active')).toBe(true);
+      expect(el.querySelectorAll('.step-number.current-step').length).toBe(1);
+      expect(el.querySelectorAll('.cell.note.current-step').length).toBe(1);
+      expect(el.querySelectorAll('.cell.current-step').length).toBeGreaterThan(1);
+
+      fixture.componentRef.setInput('isPlaying', false);
+      fixture.componentRef.setInput('currentStep', -1);
+      fixture.detectChanges();
+
+      expect(el.querySelector('.play-btn')?.classList.contains('active')).toBe(false);
+      expect(el.querySelectorAll('.current-step').length).toBe(0);
+    });
+  });
 });

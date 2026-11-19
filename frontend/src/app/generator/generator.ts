@@ -1,10 +1,11 @@
 import {
   Component,
+  OnDestroy,
   OnInit,
   ChangeDetectorRef
 } from '@angular/core';
 
-import { debounceTime } from 'rxjs';
+import { Subscription, debounceTime } from 'rxjs';
 
 import {
   FormBuilder,
@@ -37,10 +38,14 @@ import { PlaybackSequence } from '../models/playback-sequence';
   templateUrl: './generator.html',
   styleUrls: ['./generator.css']
 })
-export class GeneratorComponent implements OnInit {
+export class GeneratorComponent implements OnInit, OnDestroy {
 
   patternForm: FormGroup;
   preview: PatternPreview | null = null;
+  currentStep = -1;
+  isPlaying = false;
+
+  private readonly subscriptions = new Subscription();
 
   readonly availableScales = AVAILABLE_SCALES;
   readonly availableKeys = AVAILABLE_KEYS;
@@ -79,13 +84,33 @@ export class GeneratorComponent implements OnInit {
   ngOnInit(): void {
     this.loadPreview(this.patternForm.value);
 
-    this.patternForm.valueChanges
-      .pipe(
-        debounceTime(300)
-      )
-      .subscribe(formValues => {
-        this.loadPreview(formValues);
-      });
+    this.subscriptions.add(
+      this.patternForm.valueChanges
+        .pipe(
+          debounceTime(300)
+        )
+        .subscribe(formValues => {
+          this.loadPreview(formValues);
+        })
+    );
+
+    this.subscriptions.add(
+      this.sequencerServices.currentStep$.subscribe(step => {
+        this.currentStep = step;
+        this.cdr.detectChanges();
+      })
+    );
+
+    this.subscriptions.add(
+      this.sequencerServices.isPlaying$.subscribe(playing => {
+        this.isPlaying = playing;
+        this.cdr.detectChanges();
+      })
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
   }
 
   private loadPreview(formValues: any): void {

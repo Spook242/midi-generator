@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { PIANO_ROLL_NOTES, pitchToRow } from './pattern-mapping.util';
-import { gridToPlaybackSequence } from './pattern-mapping.util';
+import { PIANO_ROLL_NOTES, gridToPlaybackSequence, pitchToRow, stepsToTransportTime } from './pattern-mapping.util';
 
 describe('Pattern Mapping Utils', () => {
   describe('PIANO_ROLL_NOTES', () => {
@@ -36,14 +35,32 @@ describe('Pattern Mapping Utils', () => {
     });
   });
 
+  describe('stepsToTransportTime()', () => {
+    it('should format step counts in Tone.js Bars:Quarters:Sixteenths notation', () => {
+      expect(stepsToTransportTime(1)).toBe('0:0:1');
+      expect(stepsToTransportTime(2)).toBe('0:0:2');
+      expect(stepsToTransportTime(8)).toBe('0:2:0');
+      expect(stepsToTransportTime(64)).toBe('4:0:0');
+    });
+  });
+
   describe('gridToPlaybackSequence', () => {
-  it('should translate a note at index 0 to time 0:0:0', () => {
+  it('should translate a note at index 0 to time 0:0:0 with Tone.js duration format and totalSteps', () => {
     const mockDurations = [ [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] ];
     const result = gridToPlaybackSequence(mockDurations, 120);
 
     expect(result.notes[0].time).toBe('0:0:0');
     expect(result.notes[0].note).toBe('C6');
-    expect(result.notes[0].duration).toBe('1 * 16n');
+    expect(result.notes[0].duration).toBe('0:0:1');
+    expect(result.totalSteps).toBe(16);
+  });
+
+  it('should format multi-cell durations into Bars:Quarters:Sixteenths notation', () => {
+    const mockDurations = [ [2, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] ];
+    const result = gridToPlaybackSequence(mockDurations, 120);
+
+    expect(result.notes[0].duration).toBe('0:0:2');
+    expect(result.notes[1].duration).toBe('0:2:0');
   });
 
   it('should correctly calculate the time string for the 6th cell (index 5)', () => {
@@ -58,6 +75,7 @@ describe('Pattern Mapping Utils', () => {
     const result = gridToPlaybackSequence(mockDurations, 120);
 
     expect(result.notes.length).toBe(0);
+    expect(result.totalSteps).toBe(4);
   });
 });
 });

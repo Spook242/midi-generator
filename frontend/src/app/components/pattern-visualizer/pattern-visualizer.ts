@@ -26,6 +26,8 @@ import { PlaybackSequence } from '../../models/playback-sequence';
 export class PatternVisualizerComponent implements OnChanges {
   @Input() preview: PatternPreview | null = null;
   @Input() bpm = 120;
+  @Input() currentStep = -1;
+  @Input() isPlaying = false;
 
   @Output() play = new EventEmitter<PlaybackSequence>();
   @Output() stop = new EventEmitter<void>();
@@ -60,6 +62,14 @@ export class PatternVisualizerComponent implements OnChanges {
     public readonly gridService: PatternGridService,
     private readonly audioPreview: AudioPreview
   ) {}
+
+  isStepInNote(row: number, column: number): boolean {
+    if (this.currentStep < 0) {
+      return false;
+    }
+    const duration = this.gridService.getNoteDuration(row, column);
+    return duration > 0 && this.currentStep >= column && this.currentStep < column + duration;
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['preview'] && this.preview) {
