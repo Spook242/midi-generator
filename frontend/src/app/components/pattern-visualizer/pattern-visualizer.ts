@@ -203,44 +203,48 @@ export class PatternVisualizerComponent implements OnChanges {
       let newDuration = this.resizeInitialDuration + deltaSteps;
       newDuration = Math.max(1, newDuration);
 
-      const maxDuration =
-        this.gridService.steps.length - this.resizeOriginalColumn;
+      const maxDuration = this.gridService.getMaxDurationFrom(
+        this.resizeRow,
+        this.resizeOriginalColumn,
+        this.resizeCurrentColumn
+      );
 
       newDuration = Math.min(newDuration, maxDuration);
 
-      this.gridService.updateNoteBounds(
+      const updated = this.gridService.updateNoteBounds(
         this.resizeRow,
         this.resizeCurrentColumn,
         this.resizeOriginalColumn,
         newDuration
       );
 
-      this.resizeCurrentColumn = this.resizeOriginalColumn;
+      if (updated) {
+        this.resizeCurrentColumn = this.resizeOriginalColumn;
+      }
       return;
     }
 
+    const originalEnd = this.resizeOriginalColumn + this.resizeInitialDuration;
+    const minColumn = this.gridService.getMinStartColumnBefore(
+      this.resizeRow,
+      originalEnd,
+      this.resizeCurrentColumn
+    );
+
     let newColumn = this.resizeOriginalColumn + deltaSteps;
-    let newDuration = this.resizeInitialDuration - deltaSteps;
+    newColumn = Math.max(minColumn, Math.min(newColumn, originalEnd - 1));
+    const newDuration = originalEnd - newColumn;
 
-    if (newColumn < 0) {
-      newColumn = 0;
-      newDuration = this.resizeInitialDuration + this.resizeOriginalColumn;
-    }
-
-    if (newDuration < 1) {
-      newDuration = 1;
-      newColumn =
-        this.resizeOriginalColumn + this.resizeInitialDuration - 1;
-    }
-
-    this.gridService.updateNoteBounds(
+    const updated = this.gridService.updateNoteBounds(
       this.resizeRow,
       this.resizeCurrentColumn,
       newColumn,
       newDuration
     );
 
-    this.resizeCurrentColumn = newColumn;
+    if (updated) {
+      this.resizeCurrentColumn = newColumn;
+    }
   }
 
   private handleDragMove(event: MouseEvent): void {
@@ -277,7 +281,7 @@ export class PatternVisualizerComponent implements OnChanges {
       newRow !== this.dragCurrentRow ||
       newColumn !== this.dragCurrentColumn
     ) {
-      this.gridService.moveNote(
+      const moved = this.gridService.moveNote(
         this.dragCurrentRow,
         this.dragCurrentColumn,
         newRow,
@@ -285,8 +289,15 @@ export class PatternVisualizerComponent implements OnChanges {
         this.dragDuration
       );
 
-      this.dragCurrentRow = newRow;
-      this.dragCurrentColumn = newColumn;
+      if (moved) {
+        const rowChanged = newRow !== this.dragCurrentRow;
+        this.dragCurrentRow = newRow;
+        this.dragCurrentColumn = newColumn;
+
+        if (rowChanged && this.notes[newRow]) {
+          void this.audioPreview.playNote(this.notes[newRow]);
+        }
+      }
     }
   }
 

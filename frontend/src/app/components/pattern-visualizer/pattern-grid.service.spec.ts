@@ -122,4 +122,64 @@ describe('PatternGridService', () => {
       expect(service.noteDurations[24][4]).toBe(1);
     });
   });
+
+  describe('Collision prevention and boundary helpers', () => {
+    it('should reject moveNote and preserve both notes when target range overlaps another note', () => {
+      service.toggleCell(24, 0);
+      service.updateNoteBounds(24, 0, 0, 2); // [0, 2)
+      service.toggleCell(24, 4);
+      service.updateNoteBounds(24, 4, 4, 2); // [4, 6)
+
+      const moved = service.moveNote(24, 0, 24, 3, 2); // [3, 5) overlaps [4, 6)
+
+      expect(moved).toBe(false);
+      expect(service.noteDurations[24][0]).toBe(2);
+      expect(service.noteDurations[24][4]).toBe(2);
+      expect(service.grid[24][0]).toBe(true);
+      expect(service.grid[24][1]).toBe(true);
+      expect(service.grid[24][4]).toBe(true);
+      expect(service.grid[24][5]).toBe(true);
+    });
+
+    it('should allow jumping over another note to an empty slot without erasing the middle note', () => {
+      service.toggleCell(24, 0);
+      service.updateNoteBounds(24, 0, 0, 2); // [0, 2)
+      service.toggleCell(24, 4);
+      service.updateNoteBounds(24, 4, 4, 2); // [4, 6)
+
+      const blocked = service.moveNote(24, 0, 24, 3, 2);
+      expect(blocked).toBe(false);
+
+      const jumped = service.moveNote(24, 0, 24, 7, 2);
+      expect(jumped).toBe(true);
+      expect(service.noteDurations[24][0]).toBe(0);
+      expect(service.noteDurations[24][4]).toBe(2);
+      expect(service.noteDurations[24][7]).toBe(2);
+    });
+
+    it('should reject updateNoteBounds when resizing left or right overlaps an adjacent note', () => {
+      service.toggleCell(24, 0);
+      service.updateNoteBounds(24, 0, 0, 2); // [0, 2)
+      service.toggleCell(24, 4);
+      service.updateNoteBounds(24, 4, 4, 2); // [4, 6)
+
+      expect(service.updateNoteBounds(24, 0, 0, 5)).toBe(false);
+      expect(service.noteDurations[24][0]).toBe(2);
+      expect(service.noteDurations[24][4]).toBe(2);
+
+      expect(service.updateNoteBounds(24, 4, 1, 5)).toBe(false);
+      expect(service.noteDurations[24][4]).toBe(2);
+      expect(service.noteDurations[24][0]).toBe(2);
+    });
+
+    it('should calculate getMaxDurationFrom and getMinStartColumnBefore around adjacent notes', () => {
+      service.toggleCell(24, 1);
+      service.updateNoteBounds(24, 1, 1, 2); // [1, 3)
+      service.toggleCell(24, 6);
+      service.updateNoteBounds(24, 6, 6, 3); // [6, 9)
+
+      expect(service.getMaxDurationFrom(24, 1, 1)).toBe(5); // up to col 6
+      expect(service.getMinStartColumnBefore(24, 9, 6)).toBe(3); // after [1, 3)
+    });
+  });
 });
