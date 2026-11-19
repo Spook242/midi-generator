@@ -276,4 +276,42 @@ describe('PatternVisualizerComponent', () => {
       expect(el.querySelectorAll('.current-step').length).toBe(0);
     });
   });
+
+  describe('Drag audio preview and resize collision clamping', () => {
+    it('should play audio preview only when dragging vertically to a different row', () => {
+      gridService.toggleCell(10, 5);
+      gridService.updateNoteBounds(10, 5, 5, 2);
+
+      const startEvent = new MouseEvent('mousedown', { clientX: 100, clientY: 100 });
+      component.startDrag(startEvent, 10, 5);
+
+      // Horizontal move on same row -> should NOT trigger audioPreview
+      component.onMouseMove(new MouseEvent('mousemove', { clientX: 132, clientY: 100 }));
+      expect(audioPreview.playNote).not.toHaveBeenCalled();
+
+      // Vertical move to row 11 -> SHOULD trigger audioPreview for row 11
+      component.onMouseMove(new MouseEvent('mousemove', { clientX: 132, clientY: 132 }));
+      expect(audioPreview.playNote).toHaveBeenCalledTimes(1);
+      expect(audioPreview.playNote).toHaveBeenCalledWith(PIANO_ROLL_NOTES[11]);
+
+      component.onMouseUp();
+    });
+
+    it('should clamp right-edge resizing at the start of an adjacent note on the same row', () => {
+      gridService.toggleCell(24, 0);
+      gridService.updateNoteBounds(24, 0, 0, 2); // [0, 2)
+      gridService.toggleCell(24, 4);
+      gridService.updateNoteBounds(24, 4, 4, 2); // [4, 6)
+
+      const startEvent = new MouseEvent('mousedown', { clientX: 100 });
+      component.startResize(startEvent, 24, 0, 'right');
+
+      // Drag 10 steps right (320px), which would reach col 12 if unclamped
+      component.onMouseMove(new MouseEvent('mousemove', { clientX: 420 }));
+      component.onMouseUp();
+
+      expect(gridService.getNoteDuration(24, 0)).toBe(4); // clamped before col 4
+      expect(gridService.getNoteDuration(24, 4)).toBe(2); // adjacent note untouched
+    });
+  });
 });
