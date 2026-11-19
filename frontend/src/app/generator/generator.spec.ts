@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { GeneratorComponent } from './generator';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MidiGeneratorService } from '../services/midi-generator';
+import { SequencerService } from '../services/sequencer';
 import { of, throwError } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { By } from '@angular/platform-browser';
@@ -123,5 +124,25 @@ describe('GeneratorComponent', () => {
     expect(options[0].nativeElement.value).toBe('');
     expect(options[1].nativeElement.textContent.trim()).toBe('Industrial Bassline');
     expect(options[1].nativeElement.value).toBe('Industrial Bassline');
+  });
+
+  it('should sync bpm form control and SequencerService when PatternVisualizer emits bpmChange', () => {
+    const sequencerService = TestBed.inject(SequencerService);
+    const setBpmSpy = vi.spyOn(sequencerService, 'setBpm').mockImplementation(() => {});
+
+    const bpmButtons = fixture.debugElement.queryAll(By.css('app-pattern-visualizer .bpm-btn'));
+    expect(bpmButtons.length).toBe(2);
+
+    bpmButtons[1].nativeElement.click();
+    fixture.detectChanges();
+
+    expect(component.patternForm.get('bpm')?.value).toBe(121);
+    expect(setBpmSpy).toHaveBeenCalledWith(121);
+
+    bpmButtons[0].nativeElement.click();
+    fixture.detectChanges();
+
+    expect(component.patternForm.get('bpm')?.value).toBe(120);
+    expect(setBpmSpy).toHaveBeenCalledWith(120);
   });
 });
