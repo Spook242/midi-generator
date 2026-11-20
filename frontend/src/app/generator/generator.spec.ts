@@ -181,4 +181,71 @@ describe('GeneratorComponent', () => {
       clickSpy.mockRestore();
     }
   });
+
+  it('should load form parameters, active state, and preview when clicking Edit on a library item', () => {
+    const items = fixture.debugElement.queryAll(By.css('app-library .library-item'));
+    items[1].query(By.css('.edit-btn')).nativeElement.click();
+    fixture.detectChanges();
+
+    expect(component.patternForm.get('name')?.value).toBe('Ambient Synth');
+    expect(component.patternForm.get('bpm')?.value).toBe(90);
+    expect(component.patternForm.get('scale')?.value).toBe('Dorian');
+    expect(component.patternForm.get('key')?.value).toBe('D');
+    expect(component.patternForm.get('pattern')?.value).toBe('Atmospheric Pad');
+
+    expect(component.libraryItems[1].isActive).toBe(true);
+    expect(component.libraryItems[0].isActive).toBe(false);
+    expect(component.preview?.notes.length).toBe(24);
+  });
+
+  it('should export the selected library item when clicking Export in MY LIBRARY', () => {
+    const originalCreateObjectURL = window.URL.createObjectURL;
+    const originalRevokeObjectURL = window.URL.revokeObjectURL;
+    window.URL.createObjectURL = vi.fn().mockReturnValue('blob:mock');
+    window.URL.revokeObjectURL = vi.fn();
+    const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+
+    try {
+      const items = fixture.debugElement.queryAll(By.css('app-library .library-item'));
+      items[2].query(By.css('.export-btn')).nativeElement.click();
+
+      expect(mockMidiService.generatePattern).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'EBM sequence',
+          bpm: 128,
+          key: 'E',
+          scale: 'Minor',
+          pattern: 'EBM Sequence'
+        })
+      );
+    } finally {
+      window.URL.createObjectURL = originalCreateObjectURL;
+      window.URL.revokeObjectURL = originalRevokeObjectURL;
+      clickSpy.mockRestore();
+    }
+  });
+
+  it('should add a new active item to MY LIBRARY when generating a pattern with a new name', () => {
+    const originalCreateObjectURL = window.URL.createObjectURL;
+    const originalRevokeObjectURL = window.URL.revokeObjectURL;
+    window.URL.createObjectURL = vi.fn().mockReturnValue('blob:mock');
+    window.URL.revokeObjectURL = vi.fn();
+    const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+
+    try {
+      component.patternForm.patchValue({ name: 'Acid Lead', bpm: 135, lengthInBars: 4 }, { emitEvent: false });
+      component.onGenerate();
+
+      expect(component.libraryItems.length).toBe(4);
+      const added = component.libraryItems[3];
+      expect(added.name).toBe('Acid Lead');
+      expect(added.bpm).toBe(135);
+      expect(added.isActive).toBe(true);
+      expect(component.libraryItems[0].isActive).toBe(false);
+    } finally {
+      window.URL.createObjectURL = originalCreateObjectURL;
+      window.URL.revokeObjectURL = originalRevokeObjectURL;
+      clickSpy.mockRestore();
+    }
+  });
 });

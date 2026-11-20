@@ -89,3 +89,34 @@ export function gridToPlaybackSequence(
     notes: sequenceNotes
   };
 }
+
+/**
+ * Converts a Note array into a Tone.js PlaybackSequence for direct audio playback.
+ */
+export function notesToPlaybackSequence(
+  notes: Note[],
+  bpm: number,
+  totalSteps = 64
+): PlaybackSequence {
+  const sequenceNotes = [];
+
+  for (const n of notes) {
+    const row = pitchToRow(n.pitch);
+    if (row < 0) {
+      continue;
+    }
+
+    sequenceNotes.push({
+      note: PIANO_ROLL_NOTES[row],
+      time: stepsToTransportTime(n.startPosition),
+      duration: stepsToTransportTime(n.duration),
+      velocity: Math.max(0.05, Math.min(1, n.velocity / 127))
+    });
+  }
+
+  return {
+    bpm,
+    totalSteps,
+    notes: sequenceNotes
+  };
+}

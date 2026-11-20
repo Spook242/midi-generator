@@ -57,7 +57,8 @@ describe('LibraryComponent', () => {
     expect(itemElements[1].classes['active']).toBeFalsy();
   });
 
-  it('should call SequencerService to play the sequence when Play button is clicked', async () => {
+  it('should call SequencerService to play the real item sequence and emit selectItem when Play button is clicked', async () => {
+    const selectSpy = vi.spyOn(component.selectItem, 'emit');
     const firstItem = fixture.debugElement.queryAll(By.css('.library-item'))[0];
     const playButton = firstItem.query(By.css('.play-btn')).nativeElement;
 
@@ -65,11 +66,26 @@ describe('LibraryComponent', () => {
 
     await fixture.whenStable();
 
+    expect(selectSpy).toHaveBeenCalledWith(component.items[0]);
     expect(audioServiceMock.initializeAudio).toHaveBeenCalled();
     expect(sequencerServiceMock.playSequence).toHaveBeenCalled();
 
     const sequencePassed = sequencerServiceMock.playSequence.mock.calls[0][0];
     expect(sequencePassed.bpm).toBe(120);
-    expect(sequencePassed.notes.length).toBe(8);
+    expect(sequencePassed.notes.length).toBe(16);
+  });
+
+  it('should emit editItem and exportItem without triggering selectItem propagation', () => {
+    const selectSpy = vi.spyOn(component.selectItem, 'emit');
+    const editSpy = vi.spyOn(component.editItem, 'emit');
+    const exportSpy = vi.spyOn(component.exportItem, 'emit');
+
+    const secondItem = fixture.debugElement.queryAll(By.css('.library-item'))[1];
+    secondItem.query(By.css('.edit-btn')).nativeElement.click();
+    secondItem.query(By.css('.export-btn')).nativeElement.click();
+
+    expect(editSpy).toHaveBeenCalledWith(component.items[1]);
+    expect(exportSpy).toHaveBeenCalledWith(component.items[1]);
+    expect(selectSpy).not.toHaveBeenCalled();
   });
 });
