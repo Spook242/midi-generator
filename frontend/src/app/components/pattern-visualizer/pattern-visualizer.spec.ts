@@ -337,4 +337,24 @@ describe('PatternVisualizerComponent', () => {
       expect(stopSpy).toHaveBeenCalledOnce();
     });
   });
+
+  describe('Rhythmic guides and sharp row classes', () => {
+    it('should apply sharp-row class only to rows with sharps and beat-start/bar-start to header steps', () => {
+      const el = fixture.nativeElement as HTMLElement;
+      const rows = Array.from(el.querySelectorAll('.note-row'));
+
+      // Row 0 is C6 (natural), Row 2 is A#5 (sharp)
+      expect(rows[0].classList.contains('sharp-row')).toBe(false);
+      expect(rows[2].classList.contains('sharp-row')).toBe(true);
+      expect(el.querySelectorAll('.note-row.sharp-row').length).toBe(20);
+
+      const stepHeaders = Array.from(el.querySelectorAll('.step-number'));
+      expect(stepHeaders[0].classList.contains('bar-start')).toBe(true);
+      expect(stepHeaders[0].classList.contains('beat-start')).toBe(true);
+      expect(stepHeaders[4].classList.contains('beat-start')).toBe(true);
+      expect(stepHeaders[4].classList.contains('bar-start')).toBe(false);
+      expect(stepHeaders[16].classList.contains('bar-start')).toBe(true);
+      expect(stepHeaders[1].classList.contains('beat-start')).toBe(false);
+    });
+  });
 });
