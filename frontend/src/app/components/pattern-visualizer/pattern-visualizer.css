@@ -13,23 +13,59 @@
 
   overflow: auto;
   box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: #3a3f4b #16181e;
 }
+
+.visualizer::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.visualizer::-webkit-scrollbar-track {
+  background: #16181e;
+  border-radius: 4px;
+}
+
+.visualizer::-webkit-scrollbar-thumb {
+  background: #3a3f4b;
+  border-radius: 4px;
+}
+
+.visualizer::-webkit-scrollbar-thumb:hover {
+  background: #4e5566;
+}
+
+.visualizer::-webkit-scrollbar-corner {
+  background: #16181e;
+}
+
 .piano-roll {
   width: max-content;
   min-width: max-content;
 }
 
 .header {
+  position: sticky;
+  top: 0;
+  z-index: 4;
   display: flex;
   align-items: center;
 
-  margin-bottom: 4px;
+  background: var(--panel-bg, #1C1F26);
+  padding-bottom: 4px;
+  margin-bottom: 0;
 
   width: max-content;
 }
 
 .note-title {
+  position: sticky;
+  left: 0;
+  z-index: 5;
   width: 60px;
+  height: 28px;
+  background: var(--panel-bg, #1C1F26);
   flex-shrink: 0;
 }
 
@@ -49,6 +85,16 @@
   flex-shrink: 0;
 }
 
+.step-number.beat-start {
+  color: #c5cbd6;
+  font-weight: 600;
+}
+
+.step-number.bar-start {
+  color: #60a5fa;
+  font-weight: 700;
+}
+
 .note-row {
   display: flex;
   align-items: center;
@@ -59,12 +105,23 @@
 }
 
 .note-name {
+  position: sticky;
+  left: 0;
+  z-index: 3;
   width: 60px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  background: var(--panel-bg, #1C1F26);
   flex-shrink: 0;
 
   color: white;
   font-size: 14px;
   font-weight: 500;
+}
+
+.note-row.sharp-row .note-name {
+  color: #8f95a3;
 }
 
 .cell {
@@ -84,8 +141,24 @@
   transition: background 0.15s;
 }
 
+.note-row.sharp-row .cell:not(.note):not(.current-step) {
+  background: #35373e;
+}
+
+.cell.beat-start:not(.note):not(.current-step) {
+  box-shadow: inset 2px 0 0 rgba(255, 255, 255, 0.14);
+}
+
+.cell.bar-start:not(.note):not(.current-step) {
+  box-shadow: inset 2px 0 0 rgba(59, 130, 246, 0.55);
+}
+
 .cell:hover {
   background: #666;
+}
+
+.note-row.sharp-row .cell:not(.note):not(.current-step):hover {
+  background: #555966;
 }
 
 .cell.active {

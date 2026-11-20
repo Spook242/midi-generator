@@ -51,14 +51,18 @@
       <div class="note-title"></div>
 
       @for (step of gridService.steps; track step; let col = $index) {
-        <div class="step-number" [class.current-step]="col === currentStep">
+        <div
+          class="step-number"
+          [class.beat-start]="col % 4 === 0"
+          [class.bar-start]="col % 16 === 0"
+          [class.current-step]="col === currentStep">
           {{ step }}
         </div>
       }
     </div>
 
     @for (note of notes; track note; let row = $index) {
-      <div class="note-row">
+      <div class="note-row" [class.sharp-row]="note.includes('#')">
 
         <div class="note-name">
           {{ note }}
@@ -93,6 +97,8 @@
             <div
               class="cell"
               [class.active]="gridService.grid[row][column]"
+              [class.beat-start]="column % 4 === 0"
+              [class.bar-start]="column % 16 === 0"
               [class.current-step]="column === currentStep"
               (mousedown)="onCellMouseDown($event, row, column)">
             </div>
