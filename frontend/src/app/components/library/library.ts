@@ -1,8 +1,45 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { LibraryItem } from '../../models/library-item';
 import { AudioService } from '../../services/audio';
 import { SequencerService } from '../../services/sequencer';
-import { PlaybackSequence } from '../../models/playback-sequence';
+import { PatternGeneratorService } from '../../services/pattern-generator.service';
+import { notesToPlaybackSequence } from '../pattern-visualizer/pattern-mapping.util';
+
+export const DEFAULT_LIBRARY_ITEMS: LibraryItem[] = [
+  {
+    id: '1',
+    name: 'Industrial Bassline',
+    bpm: 120,
+    duration: '00:08',
+    isActive: true,
+    key: 'C',
+    scale: 'Phrygian',
+    lengthInBars: 4,
+    pattern: 'Industrial Bassline'
+  },
+  {
+    id: '2',
+    name: 'Ambient Synth',
+    bpm: 90,
+    duration: '00:11',
+    isActive: false,
+    key: 'D',
+    scale: 'Dorian',
+    lengthInBars: 4,
+    pattern: 'Atmospheric Pad'
+  },
+  {
+    id: '3',
+    name: 'EBM sequence',
+    bpm: 128,
+    duration: '00:08',
+    isActive: false,
+    key: 'E',
+    scale: 'Minor',
+    lengthInBars: 4,
+    pattern: 'EBM Sequence'
+  }
+];
 
 @Component({
   selector: 'app-library',
@@ -11,34 +48,51 @@ import { PlaybackSequence } from '../../models/playback-sequence';
   styleUrls: ['./library.css']
 })
 export class LibraryComponent {
-  items: LibraryItem[] = [
-    { id: '1', name: 'Industrial Bassline', bpm: 120, duration: '00:30', isActive: true },
-    { id: '2', name: 'Ambient Synth', bpm: 90, duration: '03:38', isActive: false },
-    { id: '3', name: 'EBM sequence', bpm: 128, duration: '02:44', isActive: false }
-  ];
+  @Input() items: LibraryItem[] = DEFAULT_LIBRARY_ITEMS.map(item => ({ ...item }));
+
+  @Output() selectItem = new EventEmitter<LibraryItem>();
+  @Output() editItem = new EventEmitter<LibraryItem>();
+  @Output() exportItem = new EventEmitter<LibraryItem>();
 
   constructor(
     private audioService: AudioService,
-    private sequencerService: SequencerService
+    private sequencerService: SequencerService,
+    private patternGeneratorService: PatternGeneratorService
   ) {}
 
-  public async playItem(item: LibraryItem): Promise<void> {
+  public onSelect(item: LibraryItem): void {
+    this.selectItem.emit(item);
+  }
+
+  public onEdit(item: LibraryItem, event: MouseEvent): void {
+    event.stopPropagation();
+    this.editItem.emit(item);
+  }
+
+  public onExport(item: LibraryItem, event: MouseEvent): void {
+    event.stopPropagation();
+    this.exportItem.emit(item);
+  }
+
+  public async playItem(item: LibraryItem, event?: MouseEvent): Promise<void> {
+    event?.stopPropagation();
+    this.selectItem.emit(item);
+
     await this.audioService.initializeAudio();
 
-    const mockSequence: PlaybackSequence = {
-      bpm: item.bpm,
-      notes: [
-        { note: 'D2', time: '0:0:0', duration: '16n', velocity: 0.9 },
-        { note: 'D2', time: '0:0:1', duration: '16n', velocity: 0.7 },
-        { note: 'D2', time: '0:0:2', duration: '16n', velocity: 0.9 },
-        { note: 'F2', time: '0:0:3', duration: '16n', velocity: 1.0 },
-        { note: 'D2', time: '0:1:0', duration: '16n', velocity: 0.9 },
-        { note: 'D2', time: '0:1:1', duration: '16n', velocity: 0.7 },
-        { note: 'C2', time: '0:1:2', duration: '16n', velocity: 0.8 },
-        { note: 'D2', time: '0:1:3', duration: '16n', velocity: 0.9 }
-      ]
-    };
+    const lengthInBars = item.lengthInBars ?? 4;
+    const notes = item.notes?.length
+      ? item.notes
+      : this.patternGeneratorService.generatePreview({
+          name: item.name,
+          bpm: item.bpm,
+          key: item.key ?? 'C',
+          scale: item.scale ?? 'Phrygian',
+          lengthInBars,
+          pattern: item.pattern ?? 'Industrial Bassline'
+        }).notes;
 
-    this.sequencerService.playSequence(mockSequence);
+    const sequence = notesToPlaybackSequence(notes, item.bpm, lengthInBars * 16);
+    this.sequencerService.playSequence(sequence);
   }
 }
