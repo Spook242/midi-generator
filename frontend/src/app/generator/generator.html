@@ -8,10 +8,16 @@
       </h1>
     </div>
 
-    <nav class="nav-links">
-      <a href="#">Explore</a>
-      <a href="#" class="active">My Work</a>
-      <a href="#">Settings</a>
+    <nav class="nav-links" aria-label="Primary navigation">
+      <button type="button" class="nav-link" disabled title="Coming soon">Explore</button>
+      <a
+        class="nav-link"
+        routerLink="/generator"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }">
+        My Work
+      </a>
+      <button type="button" class="nav-link" disabled title="Coming soon">Settings</button>
 
       <div class="avatar">
         <img src="https://i.pravatar.cc/150?img=11" alt="User Avatar">

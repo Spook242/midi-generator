@@ -2,6 +2,7 @@ import { ChangeDetectorRef } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { GeneratorComponent } from './generator';
 import { ReactiveFormsModule } from '@angular/forms';
+import { provideRouter } from '@angular/router';
 import { MidiGeneratorService } from '../services/midi-generator';
 import { SequencerService } from '../services/sequencer';
 import { PatternVisualizerComponent } from '../components/pattern-visualizer/pattern-visualizer';
@@ -29,6 +30,7 @@ describe('GeneratorComponent', () => {
     await TestBed.configureTestingModule({
       imports: [GeneratorComponent, ReactiveFormsModule],
       providers: [
+        provideRouter([]),
         { provide: MidiGeneratorService, useValue: mockMidiService }
       ]
     }).compileComponents();
@@ -246,6 +248,27 @@ describe('GeneratorComponent', () => {
       window.URL.createObjectURL = originalCreateObjectURL;
       window.URL.revokeObjectURL = originalRevokeObjectURL;
       clickSpy.mockRestore();
+    }
+  });
+
+  it('should render topbar navigation without broken href="#" links', () => {
+    const brokenLinks = fixture.debugElement.queryAll(By.css('.topbar a[href="#"]'));
+    expect(brokenLinks.length).toBe(0);
+
+    const myWorkLink = fixture.debugElement.query(By.css('.topbar a.nav-link'));
+    expect(myWorkLink).toBeTruthy();
+    expect(myWorkLink.nativeElement.textContent.trim()).toBe('My Work');
+    expect(myWorkLink.nativeElement.getAttribute('href')).toBe('/generator');
+
+    const disabledNavButtons = fixture.debugElement.queryAll(By.css('.topbar button.nav-link'));
+    expect(disabledNavButtons.length).toBe(2);
+    expect(disabledNavButtons.map(btn => btn.nativeElement.textContent.trim())).toEqual([
+      'Explore',
+      'Settings'
+    ]);
+    for (const btn of disabledNavButtons) {
+      expect(btn.nativeElement.disabled).toBe(true);
+      expect(btn.nativeElement.getAttribute('title')).toBe('Coming soon');
     }
   });
 });

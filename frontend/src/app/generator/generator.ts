@@ -14,6 +14,7 @@ import {
   Validators,
   ReactiveFormsModule
 } from '@angular/forms';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 
 import { MidiGeneratorService } from '../services/midi-generator';
 import { PatternGeneratorService } from '../services/pattern-generator.service';
@@ -35,6 +36,8 @@ import { Note } from '../models/note';
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    RouterLink,
+    RouterLinkActive,
     PatternVisualizerComponent,
     LibraryComponent
   ],
